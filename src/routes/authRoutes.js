@@ -8,7 +8,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 
 router.post('/register', async (req, res) => {
     try {
-        const { username, password } = req.body;
+        const { username, email, password } = req.body;
         
         const existingUser = await User.findOne({ username });
         if (existingUser) {
@@ -20,11 +20,12 @@ router.post('/register', async (req, res) => {
         
         const user = new User({
             username,
+            email,
             password: hashedPassword
         });
         
         await user.save();
-        res.redirect('/');
+        res.redirect('/login');
     } catch (error) {
         res.status(500).json({ message: 'Error creating user' });
     }
@@ -47,6 +48,7 @@ router.post('/login', async (req, res) => {
         const token = jwt.sign({ 
             userId: user._id, 
             username: user.username,
+            email: user.email,
         }, JWT_SECRET, { 
             expiresIn: '24h' 
         });
@@ -62,7 +64,7 @@ router.post('/login', async (req, res) => {
     }
 });
 
-router.post('/logout', (req, res) => {
+router.get('/logout', (req, res) => {
     res.clearCookie('jwt');
     res.json({ message: 'Logged out successfully' });
 });

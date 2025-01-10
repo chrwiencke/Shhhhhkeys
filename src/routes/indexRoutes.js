@@ -12,5 +12,6 @@ router.get('/register', indexController.registerPage);
 
 // Authenticated Paths
 router.get('/secret', requireAuth, indexController.secretPage);
+router.get('/dashboard', requireAuth, indexController.mainDashboard);
 
 exports.router = router;

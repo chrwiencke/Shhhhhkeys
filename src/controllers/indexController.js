@@ -7,7 +7,11 @@ const aboutPage = (req, res) => {
 };
 
 const secretPage = (req, res) => {
-    res.render('secretPage');
+    res.render('secretPage', { user: req.user });
+};
+
+const mainDashboard = (req, res) => {
+    res.render('dashboard/mainPage', { user: req.user });
 };
 
 const loginPage = (req, res) => {
@@ -23,5 +27,6 @@ module.exports = {
     aboutPage,
     secretPage,
     loginPage,
-    registerPage
+    registerPage,
+    mainDashboard
 };
