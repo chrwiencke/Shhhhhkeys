@@ -3,58 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to Our Platform</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <title>Shhhhhkeys - Manage Your SSH Keys</title>
+    <link rel="stylesheet" href="tailwind.min.css">
 </head>
-<body>
-    <header>
-        <nav>
-            <a href="/" class="logo">YourLogo</a>
-            <div class="nav-links">
-                <a href="/">Home</a>
-                <a href="/about-us">About Us</a>
-            </div>
-        </nav>
-    </header>
-
-    <main>
-        <section class="hero">
-            <h1>Welcome to the Future</h1>
-            <p class="hero-text">Discover innovative solutions for your digital needs</p>
-            <a href="/about-us" class="cta-button">Learn More About Us</a>
-        </section>
-        <section class="hero">
-            <h1>Login</h1>
-            <p class="hero-text">LoginLoginLoginLoginLogin</p>
-            <a href="/auth/login" class="cta-button">Login</a>
-        </section>
-        <section class="hero">
-            <h1>Register</h1>
-            <p class="hero-text">RegisterRegisterRegisterRegister</p>
-            <a href="/auth/register" class="cta-button">Register</a>
-        </section>
-
-        <section class="features">
-            <h2>Why Choose Us</h2>
-            <div class="feature-grid">
-                <div class="feature-item">
-                    <h3>Innovation</h3>
-                    <p>Cutting-edge solutions for modern challenges</p>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-2xl font-bold text-indigo-600">Shhhhhkeys</span>
                 </div>
-                <div class="feature-item">
-                    <h3>Quality</h3>
-                    <p>Commitment to excellence in every project</p>
-                </div>
-                <div class="feature-item">
-                    <h3>Support</h3>
-                    <p>24/7 dedicated customer service</p>
+                <div class="flex items-center space-x-4">
+                    <a href="/auth/login" class="text-gray-700 hover:text-indigo-600">Login</a>
+                    <a href="/auth/register" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">Sign Up</a>
                 </div>
             </div>
-        </section>
-    </main>
+        </div>
+    </nav>
 
-    <footer>
-        <p>&copy; 2025 Your Company Name. All rights reserved.</p>
+    <!-- Hero Section -->
+    <div class="relative bg-white overflow-hidden">
+        <div class="max-w-7xl mx-auto">
+            <div class="relative z-10 pb-8 bg-white sm:pb-16 md:pb-20 lg:pb-28 xl:pb-32">
+                <main class="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 xl:mt-28">
+                    <div class="text-center">
+                        <h1 class="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
+                            <span class="block">Manage Your SSH Keys</span>
+                            <span class="block text-indigo-600">with Ease</span>
+                        </h1>
+                        <p class="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl">
+                            Upload, create, and manage your SSH keys in one place. Access them anywhere with a simple curl command.
+                        </p>
+                        <div class="mt-5 sm:mt-8 sm:flex sm:justify-center">
+                            <div class="rounded-md shadow">
+                                <a href="/dashboard/" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10">
+                                    Get Started
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="py-12 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:text-center">
+                <h2 class="text-base text-indigo-600 font-semibold tracking-wide uppercase">Features</h2>
+                <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                    Everything you need to manage SSH keys
+                </p>
+            </div>
+
+            <div class="mt-10">
+                <div class="space-y-10 md:space-y-0 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-10">
+                    <!-- Feature 1 -->
+                    <div class="relative">
+                        <div class="absolute flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
+                            <!-- Upload Icon -->
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                            </svg>
+                        </div>
+                        <div class="ml-16">
+                            <h3 class="text-lg font-medium text-gray-900">Easy Upload</h3>
+                            <p class="mt-2 text-base text-gray-500">
+                                Upload your existing SSH keys or generate new ones directly through our interface.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Feature 2 -->
+                    <div class="relative">
+                        <div class="absolute flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
+                            <!-- Terminal Icon -->
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <div class="ml-16">
+                            <h3 class="text-lg font-medium text-gray-900">Quick Access</h3>
+                            <p class="mt-2 text-base text-gray-500">
+                                Retrieve your keys instantly using curl or wget on any machine.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Feature 3 -->
+                    <div class="relative">
+                        <div class="absolute flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
+                            <!-- Key Icon -->
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                            </svg>
+                        </div>
+                        <div class="ml-16">
+                            <h3 class="text-lg font-medium text-gray-900">Key Management</h3>
+                            <p class="mt-2 text-base text-gray-500">
+                                Create, delete, and manage multiple SSH keys from a single dashboard.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Feature 4 -->
+                    <div class="relative">
+                        <div class="absolute flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
+                            <!-- Shield Icon -->
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                            </svg>
+                        </div>
+                        <div class="ml-16">
+                            <h3 class="text-lg font-medium text-gray-900">Secure Storage</h3>
+                            <p class="mt-2 text-base text-gray-500">
+                                Your SSH keys are encrypted and stored securely in our database.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CLI Example Section -->
+    <div class="bg-gray-50 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:text-center mb-10">
+                <h2 class="text-3xl font-extrabold text-gray-900">Simple to Use</h2>
+                <p class="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto">
+                    Access your SSH keys with a single command
+                </p>
+            </div>
+            <div class="bg-gray-800 rounded-lg p-6 overflow-x-auto">
+                <pre class="text-gray-100 font-mono">
+<span class="text-green-400"># Download your SSH key</span>
+curl https://sshkeyhub.com/key/username/title > ~/.ssh/authorized_keys</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white">
+        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+            <div class="mt-8 border-t border-gray-200 pt-8 md:flex md:items-center md:justify-between">
+                <div class="flex space-x-6 md:order-2">
+                    <a href="https://github.com/chrwiencke/Shhhhhkeys" class="text-gray-400 hover:text-gray-500">
+                        <span class="sr-only">GitHub</span>
+                        <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/>
+                        </svg>
+                    </a>
+                </div>
+                <p class="mt-8 text-base text-gray-400 md:mt-0 md:order-1">
+                    &copy; 2025 SSHKeyHub. All rights reserved.
+                </p>
+            </div>
+        </div>
     </footer>
 </body>
 </html>
