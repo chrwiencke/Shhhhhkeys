@@ -1,0 +1,68 @@
+<%- include('../partials/header'); -%>
+<%- include('../partials/navbardashboard'); -%>
+
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">Add SSH Key</h1>
+        
+        <!-- Display error messages if they exist in the session -->
+        <% if (typeof messages !== 'undefined' && messages.error) { %>
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
+                <p><%= messages.error %></p>
+            </div>
+        <% } %>
+
+        <form action="/dashboard/create-ssh-key" method="POST" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+            <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="title">
+                    Title
+                    <span class="text-red-500">*</span>
+                </label>
+                <input 
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    id="title"
+                    name="title"
+                    type="text"
+                    placeholder="e.g., Work Laptop"
+                    required
+                    minlength="3"
+                    maxlength="50"
+                >
+                <p class="text-gray-600 text-xs italic mt-1">Give your SSH key a memorable name</p>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="key">
+                    SSH Public Key
+                    <span class="text-red-500">*</span>
+                </label>
+                <textarea
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    id="key"
+                    name="key"
+                    rows="6"
+                    placeholder="Paste your SSH public key here (begins with ssh-rsa or ssh-ed25519)"
+                    required
+                ></textarea>
+                <p class="text-gray-600 text-xs italic mt-1">Paste your SSH public key in OpenSSH format</p>
+            </div>
+
+            <div class="flex items-center justify-between">
+                <button 
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    type="submit"
+                >
+                    Add SSH Key
+                </button>
+                <a 
+                    href="/dashboard/" 
+                    class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800"
+                >
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<%- include('../partials/footer'); -%>

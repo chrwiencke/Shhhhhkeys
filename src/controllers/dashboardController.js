@@ -1,65 +1,27 @@
-const Level = require('../models/level');
+const ShhKey = require('../models/shhkey.js');
 
-const secretPage = (req, res) => {
-    res.render('secretPage', { user: req.user });
+const profilePage = (req, res) => {
+    res.render('profilePage', { user: req.user });
 };
 
-const mainDashboard = (req, res) => {
-    res.render('dashboard/mainPage', { user: req.user });
+const mainDashboard = async (req, res) => {
+    const username = req.user.username;
+
+    const userKeys = await ShhKey.find(
+        { username: username },
+        'title key createdAt'
+    );
+    
+    console.log(userKeys)
+    res.render('dashboard/mainPage', { userKeys, user: req.user });
 };
 
-const addLevel = (req, res) => {
-    res.render('dashboard/addLevel', { user: req.user });
-};
-
-const createLevel = async (req, res) => {
-    if (!req.user.teacher) {
-        return res.redirect('/dashboard');
-    }
-
-    try {
-        const { username, levelNumber, milestones } = req.body;
-        
-        // Check if user already has levels
-        let userLevel = await Level.findOne({ username });
-
-        if (userLevel) {
-            // Update or add new level
-            const levelIndex = userLevel.levels.findIndex(l => l.levelNumber === parseInt(levelNumber));
-            
-            if (levelIndex !== -1) {
-                userLevel.levels[levelIndex].milestones = milestones;
-            } else {
-                userLevel.levels.push({
-                    levelNumber: parseInt(levelNumber),
-                    milestones
-                });
-            }
-            await userLevel.save();
-        } else {
-            // Create new level document
-            await Level.create({
-                username,
-                levels: [{
-                    levelNumber: parseInt(levelNumber),
-                    milestones
-                }]
-            });
-        }
-
-        res.redirect('/dashboard');
-    } catch (error) {
-        console.error(error);
-        res.render('dashboard/addLevel', { 
-            user: req.user, 
-            error: 'Error creating level' 
-        });
-    }
+const addShhKeyDashboard = async (req, res) => {
+    res.render('dashboard/addShhKey', { user: req.user });
 };
 
 module.exports = {
-    secretPage,
+    profilePage,
     mainDashboard,
-    addLevel,
-    createLevel
+    addShhKeyDashboard
 };

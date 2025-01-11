@@ -13,7 +13,7 @@ router.get('/register', indexController.registerPage);
 
 router.post('/register', async (req, res) => {
     try {
-        const { username, email, password, isTeacher } = req.body;
+        const { username, email, password } = req.body;
         
         const existingUser = await User.findOne({ username });
         if (existingUser) {
@@ -26,8 +26,7 @@ router.post('/register', async (req, res) => {
         const user = new User({
             username,
             email,
-            password: hashedPassword,
-            teacher: isTeacher === 'on' // Checkbox returns 'on' when checked
+            password: hashedPassword
         });
         
         await user.save();
@@ -54,8 +53,7 @@ router.post('/login', async (req, res) => {
         const token = jwt.sign({ 
             userId: user._id, 
             username: user.username,
-            email: user.email,
-            teacher: user.teacher,
+            email: user.email
         }, JWT_SECRET, { 
             expiresIn: '24h' 
         });
