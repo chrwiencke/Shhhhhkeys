@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const JWTBlock = require('../models/jwtblacklist.js');
+const validator = require('validator');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 
@@ -10,6 +11,11 @@ const requireAuth = async (req, res, next) => {
         return res.redirect('/');
     }
 
+    if (!validator.isJWT(token)) {
+        res.status(400).json({ message: 'JWT format is incorrect' });
+        console.log('JWT format is incorrect')
+    }
+    
     const tokenIsInBlacklist = await JWTBlock.findOne({ jwt: token });
 
     if (tokenIsInBlacklist) {
@@ -28,4 +34,14 @@ const requireAuth = async (req, res, next) => {
     }
 };
 
-module.exports = { requireAuth };
+const isSignedIn = async (req, res, next) => {
+    const token = req.cookies.jwt;
+
+    if (token) {
+        return res.redirect('/dashboard/');
+    }
+
+    next();
+};
+
+module.exports = { requireAuth, isSignedIn };

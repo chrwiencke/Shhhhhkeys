@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const validator = require('validator');
 const bcrypt = require('bcrypt');
 const User = require('../models/user.js');
 const JWTBlock = require('../models/jwtblacklist.js');
@@ -9,9 +10,38 @@ const postRegister = async (req, res) => {
     try {
         const { username, email, password } = req.body;
         
-        const existingUser = await User.findOne({ username });
+        if (!username || !email || !password) {
+            return res.status(400).json({ message: 'All fields are required' });
+        }
+
+        if (!validator.isLength(username, { min: 3, max: 30 })) {
+            return res.status(400).json({ message: 'Username must be between 3 and 30 characters' });
+        }
+        if (!username.match(/^[a-zA-Z0-9_]+$/)) {
+            return res.status(400).json({ message: 'Username can only contain letters, numbers and underscores' });
+        }
+
+        if (!validator.isEmail(email)) {
+            return res.status(400).json({ message: 'Email format is incorrect' });
+        }
+
+        if (!validator.isLength(password, { min: 8, max: 100 })) {
+            return res.status(400).json({ message: 'Password must be at least 8 characters long' });
+        }
+        if (!password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)) {
+            return res.status(400).json({ 
+                message: 'Password must contain at least one uppercase letter, one lowercase letter, one number and one special character' 
+            });
+        }
+        
+        const existingUser = await User.findOne({ $or: [{ username }, { email }] });
         if (existingUser) {
-            return res.status(400).json({ message: 'Username already exists' });
+            if (existingUser.username === username) {
+                return res.status(400).json({ message: 'Username already exists' });
+            }
+            if (existingUser.email === email) {
+                return res.status(400).json({ message: 'Email already exists' });
+            }
         }
 
         const saltstuff = await bcrypt.genSalt(10);
@@ -26,6 +56,7 @@ const postRegister = async (req, res) => {
         await user.save();
         res.redirect('/auth/login');
     } catch (error) {
+        console.error('Registration error:', error);
         res.status(500).json({ message: 'Error creating user' });
     }
 };
@@ -34,14 +65,20 @@ const postLogin = async (req, res) => {
     try {
         const { username, password } = req.body;
         
-        const user = await User.findOne({ username });
+        if (!username || !password) {
+            return res.status(400).json({ message: 'All fields are required' });
+        }
+
+        const sanitizedUsername = validator.escape(username);
+        
+        const user = await User.findOne({ username: sanitizedUsername });
         if (!user) {
-            return res.status(400).json({ message: 'User not found' });
+            return res.status(400).json({ message: 'Invalid credentials' });
         }
 
         const validPassword = await bcrypt.compare(password, user.password);
         if (!validPassword) {
-            return res.status(400).json({ message: 'Invalid password' });
+            return res.status(400).json({ message: 'Invalid credentials' });
         }
 
         const token = jwt.sign({ 
@@ -49,34 +86,53 @@ const postLogin = async (req, res) => {
             username: user.username,
             email: user.email
         }, JWT_SECRET, { 
-            expiresIn: '24h' 
+            expiresIn: '24h',
+            algorithm: 'HS256'
         });
 
         res.cookie('jwt', token, {
             httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
             maxAge: 24 * 60 * 60 * 1000
         });
 
         res.redirect('/dashboard/');
     } catch (error) {
+        console.error('Login error:', error);
         res.status(500).json({ message: 'Error logging in' });
     }
 };
 
 const logout = async (req, res) => {
-    const token = req.cookies.jwt;
+    try {
+        const token = req.cookies.jwt;
+        
+        if (!token) {
+            return res.status(400).json({ message: 'No token found' });
+        }
 
-    const existingToken = await User.findOne({ token });
-    if (existingToken) {
-        return res.status(400).json({ message: 'Token already exists' });
+        try {
+            jwt.verify(token, JWT_SECRET);
+        } catch (err) {
+            res.clearCookie('jwt');
+            return res.redirect('/');
+        }
+
+        const tokendb = new JWTBlock({ jwt: token });
+        await tokendb.save();
+
+        res.clearCookie('jwt', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict'
+        });
+        
+        res.redirect('/');
+    } catch (error) {
+        console.error('Logout error:', error);
+        res.status(500).json({ message: 'Error logging out' });
     }
-
-    const tokendb = new JWTBlock({ jwt: token });
-    
-    await tokendb.save();
-
-    res.clearCookie('jwt');
-    res.redirect('/');
 };
 
 const loginPage = (req, res) => {
