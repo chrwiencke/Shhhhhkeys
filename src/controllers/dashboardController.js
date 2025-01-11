@@ -12,7 +12,6 @@ const mainDashboard = async (req, res) => {
         'title key createdAt'
     );
     
-    console.log(userKeys)
     res.render('dashboard/mainPage', { userKeys, user: req.user });
 };
 
