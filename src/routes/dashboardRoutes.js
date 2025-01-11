@@ -16,7 +16,7 @@ router.post('/create-ssh-key', requireAuth, async (req, res) => {
         const { title, key } = req.body;
         const username = req.user.username
 
-        const titleExists = await ShhKey.findOne({ title });
+        const titleExists = await ShhKey.findOne({ username, title });
         if (titleExists) {
             return res.status(400).json({ message: 'Title already exists' });
         }
