@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const User = require('../models/user.js');
+const JWTBlock = require('../models/jwtblacklist.js');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 
@@ -63,6 +64,17 @@ const postLogin = async (req, res) => {
 };
 
 const logout = async (req, res) => {
+    const token = req.cookies.jwt;
+
+    const existingToken = await User.findOne({ token });
+    if (existingToken) {
+        return res.status(400).json({ message: 'Token already exists' });
+    }
+
+    const tokendb = new JWTBlock({ jwt: token });
+    
+    await tokendb.save();
+
     res.clearCookie('jwt');
     res.redirect('/');
 };
