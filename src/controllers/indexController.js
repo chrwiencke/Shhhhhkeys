@@ -6,13 +6,6 @@ const aboutPage = (req, res) => {
     res.render('aboutPage');
 };
 
-const secretPage = (req, res) => {
-    res.render('secretPage', { user: req.user });
-};
-
-const mainDashboard = (req, res) => {
-    res.render('dashboard/mainPage', { user: req.user });
-};
 
 const loginPage = (req, res) => {
     res.render('loginPage');
@@ -25,8 +18,6 @@ const registerPage = (req, res) => {
 module.exports = {
     landingPage,
     aboutPage,
-    secretPage,
     loginPage,
-    registerPage,
-    mainDashboard
+    registerPage
 };

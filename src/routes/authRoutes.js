@@ -3,12 +3,17 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const User = require('../models/user.js');
+const indexController = require('../controllers/indexController.js');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 
+// Auth Paths
+router.get('/login', indexController.loginPage);
+router.get('/register', indexController.registerPage);
+
 router.post('/register', async (req, res) => {
     try {
-        const { username, email, password } = req.body;
+        const { username, email, password, isTeacher } = req.body;
         
         const existingUser = await User.findOne({ username });
         if (existingUser) {
@@ -21,11 +26,12 @@ router.post('/register', async (req, res) => {
         const user = new User({
             username,
             email,
-            password: hashedPassword
+            password: hashedPassword,
+            teacher: isTeacher === 'on' // Checkbox returns 'on' when checked
         });
         
         await user.save();
-        res.redirect('/login');
+        res.redirect('/auth/login');
     } catch (error) {
         res.status(500).json({ message: 'Error creating user' });
     }
@@ -49,6 +55,7 @@ router.post('/login', async (req, res) => {
             userId: user._id, 
             username: user.username,
             email: user.email,
+            teacher: user.teacher,
         }, JWT_SECRET, { 
             expiresIn: '24h' 
         });
@@ -58,7 +65,7 @@ router.post('/login', async (req, res) => {
             maxAge: 24 * 60 * 60 * 1000
         });
 
-        res.redirect('/secret');
+        res.redirect('/dashboard/profile');
     } catch (error) {
         res.status(500).json({ message: 'Error logging in' });
     }
@@ -66,7 +73,8 @@ router.post('/login', async (req, res) => {
 
 router.get('/logout', (req, res) => {
     res.clearCookie('jwt');
-    res.json({ message: 'Logged out successfully' });
+    res.redirect('/');
 });
 
 module.exports = { router };
+exports.router = router;

@@ -8,7 +8,7 @@
 </head>
 
 <body>
-    <form action="/register" method="post">
+    <form action="/auth/register" method="post">
         <div class="container">
             <label for="username"><b>Username</b></label>
             <input type="text" placeholder="Enter Username" name="username" required>
@@ -18,6 +18,11 @@
 
             <label for="password"><b>Password</b></label>
             <input type="password" placeholder="Enter Password" name="password" required>
+
+            <div class="form-check mb-3">
+                <input type="checkbox" class="form-check-input" id="isTeacher" name="isTeacher">
+                <label class="form-check-label" for="isTeacher">Register as Teacher</label>
+            </div>
 
             <button type="submit">Register</button>
         </div>
