@@ -8,7 +8,7 @@ const requireAuth = async (req, res, next) => {
     const token = req.cookies.jwt;
 
     if (!token) {
-        return res.redirect('/');
+        return res.redirect('/auth/login/');
     }
 
     if (!validator.isJWT(token)) {
