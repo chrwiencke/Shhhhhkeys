@@ -1,4 +1,5 @@
 const ShhKey = require('../models/shhkey.js');
+const ShhKeyBlacklist = require('../models/sshkeytitleblacklist.js');
 const validator = require('validator');
 
 const profilePage = (req, res) => {
@@ -41,6 +42,12 @@ const createSshKeyDashboard = async (req, res) => {
             return res.status(400).json({ 
                 message: 'Title can only contain letters, numbers, spaces, hyphens and underscores' 
             });
+        }
+
+        const titleInBlacklist = await ShhKeyBlacklist.findOne({ username, title: sanitizedTitle });
+
+        if (titleInBlacklist) {
+            return res.status(401).json({ message: 'Title has been created by the same user before' });
         }
 
         if (!key) {
@@ -118,6 +125,15 @@ const deleteSshKeyDashboard = async (req, res) => {
             return res.status(403).json({ message: 'Not authorized' });
         }
         
+        const title = idExists.title
+
+        const sshkeyBlacklist = new ShhKeyBlacklist({
+            username,
+            title
+        });
+
+        await sshkeyBlacklist.save();
+
         await ShhKey.deleteOne({ _id: id });
         res.redirect('/dashboard/');
     } catch (error) {
