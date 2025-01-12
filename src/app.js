@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
-const { router: helloRoutes } = require('./routes/indexRoutes.js');
+const { router: indexRoutes } = require('./routes/indexRoutes.js');
 const { router: dashboardRoutes } = require('./routes/dashboardRoutes.js');
 const { router: authRoutes } = require('./routes/authRoutes.js');
 const { router: key } = require('./routes/key.js');
@@ -18,7 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Use each router separately
-app.use('/', helloRoutes);
+app.use('/', indexRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/auth', authRoutes);
 app.use('/', key);
