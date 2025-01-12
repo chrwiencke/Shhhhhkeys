@@ -11,7 +11,7 @@ const mainDashboard = async (req, res) => {
 
     const userKeys = await ShhKey.find(
         { username: username },
-        'title key createdAt'
+        'title key shareable createdAt'
     );
     
     res.render('dashboard/mainPage', { userKeys, user: req.user });
@@ -142,10 +142,41 @@ const deleteSshKeyDashboard = async (req, res) => {
     }
 };
 
+const enabledisableSshKeyDashboard = async (req, res) => {
+    try {
+        const username = req.user.username;
+        const id = req.params['id'];
+
+        if (!validator.isMongoId(id)) {
+            return res.status(400).json({ message: 'Invalid ID format' });
+        }
+
+        const idExists = await ShhKey.findOne({ _id: id });
+
+        if (!idExists) {
+            return res.status(400).json({ message: 'ID does not exist' });
+        }
+
+        if (idExists.username !== username) {
+            return res.status(403).json({ message: 'Not authorized' });
+        }
+
+        await ShhKey.findByIdAndUpdate(id, { 
+            $set: { shareable: !idExists.shareable }
+        });
+
+        res.redirect('/dashboard/');    
+    } catch (error) {
+        console.error('SSH Key enable/disable error:', error);
+        res.status(500).json({ message: 'Error enable/disable SSH Key' });
+    }
+};
+
 module.exports = {
     profilePage,
     mainDashboard,
     addShhKeyDashboard,
     createSshKeyDashboard,
-    deleteSshKeyDashboard
+    deleteSshKeyDashboard,
+    enabledisableSshKeyDashboard
 };

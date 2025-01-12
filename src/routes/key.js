@@ -20,6 +20,10 @@ router.get('/:user/:title', async (req, res) => {
             return res.status(404).json({ message: 'SSH Key not found' });
         }
 
+        if (!data.shareable) {
+            return res.status(403).json({ message: 'SSH Key is disabled' });
+        }
+
         const sshKey = data.key;
         res.send(sshKey);
     } catch (error) {

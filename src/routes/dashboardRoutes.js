@@ -12,5 +12,6 @@ router.get('/', requireAuth, dashboardController.mainDashboard);
 
 router.post('/create-ssh-key', requireAuth, dashboardController.createSshKeyDashboard);
 router.post('/delete-ssh-key/:id', requireAuth, dashboardController.deleteSshKeyDashboard);
+router.post('/enable-disable-ssh-key/:id', requireAuth, dashboardController.enabledisableSshKeyDashboard);
 
 exports.router = router;

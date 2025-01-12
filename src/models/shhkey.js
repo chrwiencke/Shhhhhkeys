@@ -26,6 +26,10 @@ const shhKeySchema = new mongoose.Schema({
             message: props => `${props.value} is not a valid SSH key!`
         }
     },
+    shareable: {
+        type: Boolean,
+        default: true,
+    },
     createdAt: {
         type: Date,
         default: Date.now
