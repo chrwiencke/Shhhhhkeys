@@ -21,7 +21,7 @@ app.use(cookieParser());
 app.use('/', helloRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/auth', authRoutes);
-app.use('/key', key);
+app.use('/', key);
 
 app.listen(process.env.PORT, () => {
     mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/');

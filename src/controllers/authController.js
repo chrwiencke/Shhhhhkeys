@@ -34,6 +34,10 @@ const postRegister = async (req, res) => {
             });
         }
         
+        if (username === "auth" || username === "dashboard" || username === "about") {
+            return res.status(400).json({ message: 'Cannot be named this' });
+        }
+
         const existingUser = await User.findOne({ $or: [{ username }, { email }] });
         if (existingUser) {
             if (existingUser.username === username) {
