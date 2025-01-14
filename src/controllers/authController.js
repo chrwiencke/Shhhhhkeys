@@ -142,9 +142,9 @@ const postLogin = async (req, res) => {
 const getVerify = async (req, res) => {
     try {
         const verifyToken = req.params.token;
-        console.log(verifyToken)
+
         const userToken = await User.findOne({ verificationToken: verifyToken });
-        console.log(userToken)
+
         if (!userToken) {
             return res.status(400).json({message: 'Invalid verification token'});
         }
