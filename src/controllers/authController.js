@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 const validator = require('validator');
 const bcrypt = require('bcrypt');
+const { Resend } = require('resend');
+const crypto = require('crypto');
 const User = require('../models/user.js');
 const JWTBlock = require('../models/jwtblacklist.js');
 
@@ -48,16 +50,40 @@ const postRegister = async (req, res) => {
             }
         }
 
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+
         const saltstuff = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, saltstuff);
         
         const user = new User({
             username,
             email,
-            password: hashedPassword
+            password: hashedPassword,
+            verificationToken: verificationToken
         });
         
+        const verificationUrl = `https://shh.pludo.org/auth/verify-email/${verificationToken}`;
+        const resend = new Resend(process.env.RESEND_KEY)
+        
+        try {
+            const { data, error } = await resend.emails.send({
+                from: 'Shhh Pludo <verify@huzzand.buzz>',
+                to: [email],
+                subject: 'Verify To Access Shhhhkeys',
+                html: verificationUrl,
+            });
+
+            if (error) {
+                console.error('Email sending error:', error);
+                return res.status(400).json({ message: 'Error sending verification email' });
+            }
+        } catch (emailError) {
+            console.error('Email sending error:', emailError);
+            return res.status(400).json({ message: 'Error sending verification email' });
+        }
+
         await user.save();
+
         res.redirect('/auth/login');
     } catch (error) {
         console.error('Registration error:', error);
@@ -76,6 +102,11 @@ const postLogin = async (req, res) => {
         const sanitizedUsername = validator.escape(username);
         
         const user = await User.findOne({ username: sanitizedUsername });
+        
+        if (!user.isVerified) {
+            return res.status(400).json({ message: 'Email Not Verified' });
+        }
+
         if (!user) {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
@@ -105,6 +136,27 @@ const postLogin = async (req, res) => {
     } catch (error) {
         console.error('Login error:', error);
         res.status(500).json({ message: 'Error logging in' });
+    }
+};
+
+const getVerify = async (req, res) => {
+    try {
+        const verifyToken = req.params.token;
+        console.log(verifyToken)
+        const userToken = await User.findOne({ verificationToken: verifyToken });
+        console.log(userToken)
+        if (!userToken) {
+            return res.status(400).json({message: 'Invalid verification token'});
+        }
+
+        userToken.isVerified = true;
+        userToken.verificationToken = "verified";
+
+        await userToken.save();
+        res.redirect('/auth/login');
+    } catch (error) {
+        console.error('Registration error:', error);
+        res.status(500).json({ message: 'Error creating user' });
     }
 };
 
@@ -152,5 +204,6 @@ module.exports = {
     postLogin,
     loginPage,
     registerPage,
-    logout
+    logout,
+    getVerify,
 };

@@ -12,6 +12,8 @@ router.post('/register', authController.postRegister);
 
 router.post('/login', loginLimiter, authController.postLogin);
 
+router.get('/verify-email/:token', authController.getVerify);
+
 router.get('/logout', authController.logout);
 
 module.exports = { router };
