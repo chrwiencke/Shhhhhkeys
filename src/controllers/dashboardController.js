@@ -30,6 +30,10 @@ const createSshKeyDashboard = async (req, res) => {
             return res.status(400).json({ message: 'Title is required' });
         }
 
+        if (title === "keys") {
+            return res.status(400).json({ message: 'Cannot be named this' });
+        }
+
         if (!validator.isLength(title, { min: 1, max: 100 })) {
             return res.status(400).json({ 
                 message: 'Title must be between 1 and 100 characters' 

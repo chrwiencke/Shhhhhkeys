@@ -2,6 +2,41 @@ const express = require('express');
 const router = express.Router();
 const ShhKey = require('../models/shhkey.js');
 
+router.get('/:user/keys', async (req, res) => {
+    try {
+        const user = req.params.user;
+
+        if (!user) {
+            return res.status(400).json({ message: 'No user found' });
+        }
+        
+        const data = await ShhKey.find({ username: user });
+
+        if (data.length === 0) {
+            return res.status(404).json({ message: 'SSH Keys not found' });
+        }
+
+        let allKeys = "";
+        
+        data.forEach(document => {
+            if (document.shareable) {
+                allKeys += document.key + "\n";
+            }
+        });            
+        console.log(allKeys)
+        if (!allKeys) {
+            return res.status(404).json({ message: 'No shareable SSH keys found' });
+        }
+        
+        allKeys = allKeys.trim();
+
+        res.send(allKeys);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: 'Error retrieving SSH Keys' });
+    }
+});
+
 router.get('/:user/:title', async (req, res) => {
     try {
         const title = req.params.title;
