@@ -153,10 +153,10 @@ const getVerify = async (req, res) => {
         userToken.verificationToken = "verified";
 
         await userToken.save();
-        res.redirect('/auth/login');
+        res.redirect('/auth/verified');
     } catch (error) {
-        console.error('Registration error:', error);
-        res.status(500).json({ message: 'Error creating user' });
+        console.error('Error verifying email:', error);
+        res.status(500).json({ message: 'Error verifying email' });
     }
 };
 
@@ -199,6 +199,10 @@ const registerPage = (req, res) => {
     res.render('registerPage');
 };
 
+const verifiedPage = (req, res) => {
+    res.render('verified');
+};
+
 module.exports = {
     postRegister,
     postLogin,
@@ -206,4 +210,5 @@ module.exports = {
     registerPage,
     logout,
     getVerify,
+    verifiedPage,
 };
