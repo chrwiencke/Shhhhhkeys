@@ -139,8 +139,10 @@
             </div>
             <div class="bg-gray-800 rounded-lg p-6 overflow-x-auto">
                 <pre class="text-gray-100 font-mono">
-<span class="text-green-400"># Download your SSH key</span>
-curl https://shh.pludo.org/<%= user.username %>/title >> ~/.ssh/authorized_keys</pre>
+<span class="text-green-400"># Download a single SSH key</span>
+curl https://shh.pludo.org/<%= user.username %>/title >> ~/.ssh/authorized_keys
+<span class="text-green-400"># Or to get all SSH keys</span>
+curl https://shh.pludo.org/<%= user.username %>/keys >> ~/.ssh/authorized_keys</pre>
             </div>
         </div>
     </div>
