@@ -30,7 +30,7 @@ const postRegister = async (req, res) => {
         if (!validator.isLength(password, { min: 8, max: 100 })) {
             return res.status(400).json({ message: 'Password must be at least 8 characters long' });
         }
-        if (!password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)) {
+        if (!password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?])[A-Za-z\d!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]{8,}$/)) {
             return res.status(400).json({ 
                 message: 'Password must contain at least one uppercase letter, one lowercase letter, one number and one special character' 
             });
