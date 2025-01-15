@@ -70,7 +70,34 @@ const postRegister = async (req, res) => {
                 from: 'Shhh Pludo <verify@huzzand.buzz>',
                 to: [email],
                 subject: 'Verify To Access Shhhhkeys',
-                html: verificationUrl,
+                html: `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f4f5; font-family: Arial, sans-serif;">
+    <table role="presentation" style="width: 100%; border-collapse: collapse;">
+        <tr>
+            <td align="center" style="padding: 40px 0;">
+                <table role="presentation" style="width: 90%; max-width: 600px; border-collapse: collapse; background-color: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+                    <tr>
+                        <td style="padding: 40px 30px; text-align: center;">
+                            <h1 style="color: #1f2937; margin-bottom: 20px; font-size: 24px;">Verify Your Email Address</h1>
+                            <p style="color: #4b5563; margin-bottom: 30px; font-size: 16px;">Thank you for signing up! Please click the button below to verify your email address and activate your account.</p>
+                            <a href="${verificationUrl}" style="display: inline-block; background-color: #4f46e5; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-bottom: 20px;">Verify Email</a>
+                            <p style="color: #6b7280; font-size: 14px; margin-top: 20px;">If the button doesn't work, copy and paste this link into your browser:</p>
+                            <p style="color: #4f46e5; font-size: 14px; word-break: break-all;">${verificationUrl}</p>
+                            <p style="color: #9ca3af; font-size: 12px; margin-top: 40px;">If you didn't create an account, you can safely ignore this email.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`,
             });
 
             if (error) {
