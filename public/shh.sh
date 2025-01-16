@@ -54,11 +54,27 @@ SHH_USER=""
 
 # Self-installation when downloaded via wget
 if [ "$0" = "sh" ] || echo "$0" | grep -q "wget"; then
+    TEMP_SCRIPT="/tmp/shh_install_$$"
+    cat > "$TEMP_SCRIPT"
+    chmod 755 "$TEMP_SCRIPT"
+    
     echo "Installing Shhhhhkeys utility to /usr/local/bin/shh..."
-    if ! install -m 755 "$0" "/usr/local/bin/shh" 2>/dev/null; then
-        echo "Error: Unable to install to /usr/local/bin/shh. Try with sudo."
-        exit 1
+    if [ "$(id -u)" = "0" ]; then
+        # Running as root/sudo
+        if ! install -m 755 "$TEMP_SCRIPT" "/usr/local/bin/shh"; then
+            echo "Error: Installation failed"
+            rm -f "$TEMP_SCRIPT"
+            exit 1
+        fi
+    else
+        # Not running as root, try with sudo
+        if ! sudo install -m 755 "$TEMP_SCRIPT" "/usr/local/bin/shh"; then
+            echo "Error: Installation failed. Please run with sudo"
+            rm -f "$TEMP_SCRIPT"
+            exit 1
+        fi
     fi
+    rm -f "$TEMP_SCRIPT"
     echo "Installation successful! You can now use 'shh' command."
     exit 0
 fi
