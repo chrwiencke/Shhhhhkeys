@@ -134,15 +134,41 @@
             <div class="lg:text-center mb-10">
                 <h2 class="text-3xl font-extrabold text-gray-900">Simple to Use</h2>
                 <p class="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto">
-                    Access your SSH keys with a single command
+                    Multiple ways to access and manage your SSH keys
                 </p>
             </div>
-            <div class="bg-gray-800 rounded-lg p-6 overflow-x-auto">
-                <pre class="text-gray-100 font-mono">
+            <div class="space-y-6">
+                <!-- Quick Download -->
+                <div class="bg-gray-800 rounded-lg p-6 overflow-x-auto">
+                    <h3 class="text-xl text-white mb-4">Quick Download</h3>
+                    <pre class="text-gray-100 font-mono">
 <span class="text-green-400"># Download a single SSH key</span>
 curl https://shh.pludo.org/<%= user.username %>/title >> ~/.ssh/authorized_keys
-<span class="text-green-400"># Or to get all SSH keys</span>
+
+<span class="text-green-400"># Download all SSH keys for a user</span>
 curl https://shh.pludo.org/<%= user.username %>/keys >> ~/.ssh/authorized_keys</pre>
+                </div>
+
+                <!-- Utility Usage -->
+                <div class="bg-gray-800 rounded-lg p-6 overflow-x-auto">
+                    <h3 class="text-xl text-white mb-4">Using the SSH Key Utility</h3>
+                    <pre class="text-gray-100 font-mono">
+<span class="text-green-400"># Download and prepare the utility</span>
+sudo wget -O - https://shh.pludo.org/shh.sh | sh
+
+<span class="text-green-400"># Basic usage (with user/title format)</span>
+./shh.sh linuxuser user1/key1 user2/key2
+
+<span class="text-green-400"># Using -u flag (simple format)</span>
+./shh.sh -u linuxuser key1 key2  <span class="text-gray-400"># Gets linuxuser/key1 and linuxuser/key2</span>
+
+<span class="text-green-400"># Using -s flag to specify SSH key username</span>
+./shh.sh -s sshuser linuxuser key1 key2  <span class="text-gray-400"># Gets sshuser/key1 and sshuser/key2</span>
+
+<span class="text-green-400"># Mixed format with -s flag</span>
+./shh.sh linuxuser key1 user2/key2 -s sshuser key3</pre>
+                </div>
+
             </div>
         </div>
     </div>
