@@ -224,7 +224,7 @@ for key in $KEYS; do
 done
 
 # Verify keys were added
-if [ $ANY_KEYS_ADDED -eq 0; then
+if [ $ANY_KEYS_ADDED -eq 0 ]; then
     echo "Warning: No SSH keys were added to $AUTHORIZED_KEYS"
     exit 1
 fi
