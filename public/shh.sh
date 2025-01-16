@@ -56,13 +56,31 @@ SHH_USER=""
 case "$0" in
     sh|*/sh)
         TEMP_SCRIPT="/tmp/shh_install_$$"
-        cat | sed 's/\r$//' > "$TEMP_SCRIPT" || exit 1
+        # Ensure we get complete input
+        cat > "$TEMP_SCRIPT" || exit 1
+        
+        # Validate script content
+        if ! grep -q "#!/bin/bash" "$TEMP_SCRIPT"; then
+            echo "Error: Invalid or incomplete script download"
+            rm -f "$TEMP_SCRIPT"
+            exit 1
+        fi
+        
+        # Remove any Windows line endings
+        sed -i 's/\r$//' "$TEMP_SCRIPT"
         
         echo "Installing Shhhhhkeys utility to /usr/local/bin/shh..."
         if [ "$(id -u)" = "0" ]; then
             install -m 755 "$TEMP_SCRIPT" "/usr/local/bin/shh"
         else
             sudo install -m 755 "$TEMP_SCRIPT" "/usr/local/bin/shh"
+        fi
+        
+        # Verify installation
+        if [ ! -x "/usr/local/bin/shh" ]; then
+            echo "Error: Installation failed!"
+            rm -f "$TEMP_SCRIPT"
+            exit 1
         fi
         
         rm -f "$TEMP_SCRIPT"
