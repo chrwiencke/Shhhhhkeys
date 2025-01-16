@@ -57,22 +57,29 @@ case "$0" in
     sh|*/sh)
         TEMP_SCRIPT="/tmp/shh_install_$$"
         
-        # Read complete input with timeout to ensure we get everything
-        timeout 10 cat > "$TEMP_SCRIPT" || {
+        # Read complete input
+        cat > "$TEMP_SCRIPT"
+        if [ $? -ne 0 ]; then
             echo "Error: Failed to download complete script"
             rm -f "$TEMP_SCRIPT"
             exit 1
-        }
+        fi
         
         # Basic validation of script content
-        if ! grep -q "^#!/bin/bash" "$TEMP_SCRIPT" || ! grep -q "Shhhhhkeys" "$TEMP_SCRIPT"; then
+        if ! grep -q "^#!/bin/bash" "$TEMP_SCRIPT"; then
             echo "Error: Downloaded content appears invalid"
             echo "Please try downloading directly:"
             echo "wget https://shh.pludo.org/shh.sh"
             echo "sudo install -m 755 shh.sh /usr/local/bin/shh"
             rm -f "$TEMP_SCRIPT"
             exit 1
-        }
+        fi
+        
+        if ! grep -q "Shhhhhkeys" "$TEMP_SCRIPT"; then
+            echo "Error: Downloaded content appears invalid"
+            rm -f "$TEMP_SCRIPT"
+            exit 1
+        fi
         
         # Clean up any potential Windows line endings
         sed -i 's/\r$//' "$TEMP_SCRIPT"
@@ -85,8 +92,8 @@ case "$0" in
         fi
         
         # Verify installation
-        if [ ! -x "/usr/local/bin/shh" ] || ! grep -q "^#!/bin/bash" "/usr/local/bin/shh"; then
-            echo "Error: Installation failed or resulted in invalid script!"
+        if [ ! -x "/usr/local/bin/shh" ]; then
+            echo "Error: Installation failed!"
             rm -f "$TEMP_SCRIPT"
             exit 1
         fi
