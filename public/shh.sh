@@ -98,6 +98,17 @@ SHH_USER=""
 USE_U_FLAG=0
 ARGS_LEFT=""
 
+# Fix root user home directory first
+if [ "`id -u`" = "0" ]; then
+    if [ -n "$SUDO_USER" ]; then
+        DEFAULT_USER="$SUDO_USER"
+    else
+        DEFAULT_USER="root"
+    fi
+else
+    DEFAULT_USER="`whoami`"
+fi
+
 # First pass: extract user and flags
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -107,6 +118,8 @@ while [ $# -gt 0 ]; do
                 LINUX_USER="$2"
                 SHH_USER="$2"
                 shift
+            else
+                SHH_USER="$DEFAULT_USER"
             fi
             ;;
         "-s")
@@ -127,17 +140,15 @@ while [ $# -gt 0 ]; do
     shift
 done
 
+# Set default Linux user if not specified
+[ -z "$LINUX_USER" ] && LINUX_USER="$DEFAULT_USER"
+[ -z "$SHH_USER" ] && SHH_USER="$LINUX_USER"
+
 # Process remaining arguments for keys
 for arg in $ARGS_LEFT; do
     case "$arg" in
         */*) KEYS="$KEYS $arg" ;;
-        *) 
-            if [ -n "$SHH_USER" ]; then
-                KEYS="$KEYS $SHH_USER/$arg"
-            else
-                KEYS="$KEYS $LINUX_USER/$arg"
-            fi
-            ;;
+        *) KEYS="$KEYS $SHH_USER/$arg" ;;
     esac
 done
 
@@ -205,23 +216,24 @@ fetch_key() {
         return 1
     fi
     
-    echo "$KEY_CONTENT"
+    printf "%s\n" "$KEY_CONTENT"
     return 0
 }
 
 # Key processing section
+ANY_KEYS_ADDED=0
 for key in $KEYS; do
-    echo "Processing key: $key"
     KEY_CONTENT=`fetch_key "$key"`
-    if [ $? -eq 0 ]; then
+    RC=$?
+    if [ $RC -eq 0 ] && [ -n "$KEY_CONTENT" ]; then
         echo "Adding key: $key"
-        echo "$KEY_CONTENT" >> "$AUTHORIZED_KEYS"
-        echo "" >> "$AUTHORIZED_KEYS"
+        printf "%s\n\n" "$KEY_CONTENT" >> "$AUTHORIZED_KEYS"
+        ANY_KEYS_ADDED=1
     fi
 done
 
 # Verify keys were added
-if ! grep -q "^ssh-" "$AUTHORIZED_KEYS"; then
+if [ $ANY_KEYS_ADDED -eq 0 ]; then
     echo "Warning: No SSH keys were added to $AUTHORIZED_KEYS"
     exit 1
 fi
