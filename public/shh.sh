@@ -56,17 +56,25 @@ SHH_USER=""
 case "$0" in
     sh|*/sh)
         TEMP_SCRIPT="/tmp/shh_install_$$"
-        # Ensure we get complete input
-        cat > "$TEMP_SCRIPT" || exit 1
         
-        # Validate script content
-        if ! grep -q "#!/bin/bash" "$TEMP_SCRIPT"; then
-            echo "Error: Invalid or incomplete script download"
+        # Read complete input with timeout to ensure we get everything
+        timeout 10 cat > "$TEMP_SCRIPT" || {
+            echo "Error: Failed to download complete script"
             rm -f "$TEMP_SCRIPT"
             exit 1
-        fi
+        }
         
-        # Remove any Windows line endings
+        # Basic validation of script content
+        if ! grep -q "^#!/bin/bash" "$TEMP_SCRIPT" || ! grep -q "Shhhhhkeys" "$TEMP_SCRIPT"; then
+            echo "Error: Downloaded content appears invalid"
+            echo "Please try downloading directly:"
+            echo "wget https://shh.pludo.org/shh.sh"
+            echo "sudo install -m 755 shh.sh /usr/local/bin/shh"
+            rm -f "$TEMP_SCRIPT"
+            exit 1
+        }
+        
+        # Clean up any potential Windows line endings
         sed -i 's/\r$//' "$TEMP_SCRIPT"
         
         echo "Installing Shhhhhkeys utility to /usr/local/bin/shh..."
@@ -77,8 +85,8 @@ case "$0" in
         fi
         
         # Verify installation
-        if [ ! -x "/usr/local/bin/shh" ]; then
-            echo "Error: Installation failed!"
+        if [ ! -x "/usr/local/bin/shh" ] || ! grep -q "^#!/bin/bash" "/usr/local/bin/shh"; then
+            echo "Error: Installation failed or resulted in invalid script!"
             rm -f "$TEMP_SCRIPT"
             exit 1
         fi
