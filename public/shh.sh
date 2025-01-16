@@ -85,82 +85,85 @@ esac
 
 # Show usage if no arguments provided
 if [ $# -eq 0 ]; then
-    echo "Usage: $0 linux_user title [title2...] [-s shhkeys_user]"
-    echo "   or: $0 linux_user user/title [user2/title2...] "
-    echo "   or: $0 -u linux_user [-s shhkeys_user] title [title2...]"
-    echo "   or: $0 -s shhkeys_user linux_user title [title2...]"
+    echo "Usage: $0 [-u|-s shhkeys_user] linux_user title [title2...]"
+    echo "   or: $0 linux_user [-u|-s shhkeys_user] title [title2...]"
+    echo "   or: $0 linux_user title [title2...] [-u|-s shhkeys_user]"
     exit 1
 fi
 
-# Fix root user home directory
-if [ "`id -u`" = "0" ]; then
-    if [ -n "$SUDO_USER" ]; then
-        LINUX_USER="$SUDO_USER"
-    else
-        echo "Error: When running as root, please specify the target user"
-        exit 1
-    fi
+# Initialize variables
+LINUX_USER=""
+KEYS=""
+SHH_USER=""
+FOUND_USER=0
+
+# Parse all arguments first to find flags
+for arg in "$@"; do
+    case "$arg" in
+        "-u"|"-s") FOUND_FLAG=1 ;;
+    esac
+done
+
+# Process arguments
+while [ $# -gt 0 ]; do
+    case "$1" in
+        "-u")
+            if [ $FOUND_USER -eq 0 ]; then
+                shift
+                LINUX_USER="$1"
+                SHH_USER="$1"
+                FOUND_USER=1
+            else
+                SHH_USER="$LINUX_USER"
+            fi
+            shift
+            ;;
+        "-s")
+            shift
+            if [ $# -eq 0 ]; then
+                echo "Error: -s option requires a username"
+                exit 1
+            fi
+            SHH_USER="$1"
+            if [ $FOUND_USER -eq 0 ] && [ $# -gt 1 ]; then
+                shift
+                LINUX_USER="$1"
+                FOUND_USER=1
+            fi
+            shift
+            ;;
+        *)
+            if [ $FOUND_USER -eq 0 ]; then
+                LINUX_USER="$1"
+                [ -z "$SHH_USER" ] && SHH_USER="$1"
+                FOUND_USER=1
+                shift
+            else
+                case "$1" in
+                    */*) KEYS="$KEYS $1" ;;
+                    *) KEYS="$KEYS $SHH_USER/$1" ;;
+                esac
+                shift
+            fi
+            ;;
+    esac
+done
+
+# Validate required arguments
+if [ -z "$LINUX_USER" ]; then
+    echo "Error: Linux user not specified"
+    exit 1
 fi
 
-# First validate Linux user for all cases
-case "$1" in
-    "-s")
-        if [ "$#" -lt 4 ]; then
-            echo "Usage with -s: $0 -s shhkeys_user linux_user title [title2] ..."
-            exit 1
-        fi
-        LINUX_USER="$3"
-        SHH_USER="$2"
-        shift 3
-        ;;
-    "-u")
-        if [ "$#" -lt 3 ]; then
-            echo "Usage with -u: $0 -u linux_user [-s shhkeys_user] title [title2] ..."
-            exit 1
-        fi
-        LINUX_USER="$2"
-        SHH_USER="$2"  # Default to linux user
-        shift 2
-        ;;
-    *)
-        LINUX_USER="$1"
-        SHH_USER="$1"  # Default to linux user
-        shift
-        ;;
-esac
+if [ -z "$KEYS" ]; then
+    echo "Error: No keys specified"
+    exit 1
+fi
 
 # Validate Linux user exists and has a valid home directory
 USER_HOME=`getent passwd "$LINUX_USER" | cut -d: -f6`
 if [ -z "$USER_HOME" ] || [ ! -d "$USER_HOME" ]; then
     echo "Error: User '$LINUX_USER' does not exist or does not have a valid home directory."
-    exit 1
-fi
-
-# Process remaining arguments for keys
-while [ "$#" -gt 0 ]; do
-    case "$1" in
-        "-s")
-            if [ "$#" -lt 2 ]; then
-                echo "Error: -s option requires a username"
-                exit 1
-            fi
-            SHH_USER="$2"
-            shift 2
-            ;;
-        */*) 
-            KEYS="$KEYS $1"
-            shift
-            ;;
-        *) 
-            KEYS="$KEYS $SHH_USER/$1"
-            shift
-            ;;
-    esac
-done
-
-# Validate we have keys to process
-if [ -z "$KEYS" ]; then
-    echo "Error: No keys specified"
     exit 1
 fi
 
