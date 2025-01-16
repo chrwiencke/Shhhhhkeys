@@ -225,12 +225,36 @@ fi
 
 for key in $KEYS; do
     echo "Fetching key from: https://shh.pludo.org/$key"
-    if ! curl -s "https://shh.pludo.org/$key" >> "$AUTHORIZED_KEYS"; then
-        echo "Error: Failed to fetch key from https://shh.pludo.org/$key"
+    RESPONSE=$(curl -s -w "\n%{http_code}" "https://shh.pludo.org/$key")
+    HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+    KEY_CONTENT=$(echo "$RESPONSE" | sed '$d')
+    
+    if [ "$HTTP_CODE" != "200" ]; then
+        echo "Error: Failed to fetch key from https://shh.pludo.org/$key (HTTP $HTTP_CODE)"
         continue
     fi
+    
+    if [ -z "$KEY_CONTENT" ]; then
+        echo "Error: Empty key content received for $key"
+        continue
+    fi
+    
+    if ! echo "$KEY_CONTENT" | grep -q "^ssh-"; then
+        echo "Error: Invalid SSH key format received for $key"
+        echo "Content received: $KEY_CONTENT"
+        continue
+    fi
+    
+    echo "Adding key: $key"
+    echo "$KEY_CONTENT" >> "$AUTHORIZED_KEYS"
     echo "" >> "$AUTHORIZED_KEYS"
 done
+
+# Verify keys were added
+if ! grep -q "^ssh-" "$AUTHORIZED_KEYS"; then
+    echo "Warning: No SSH keys were added to $AUTHORIZED_KEYS"
+    exit 1
+fi
 
 if ! chown -R "$LINUX_USER:$LINUX_USER" "$SSH_DIR" 2>/dev/null; then
     echo "Error: Unable to change ownership of $SSH_DIR"
