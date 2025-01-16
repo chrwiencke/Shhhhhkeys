@@ -126,7 +126,7 @@ const postLogin = async (req, res) => {
             return res.status(400).json({ message: 'All fields are required' });
         }
         
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email: { $eq: email } });
         
         if (!user.isVerified) {
             return res.status(400).json({ message: 'Email Not Verified' });
