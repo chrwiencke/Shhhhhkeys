@@ -6,6 +6,7 @@ const { requireAuth } = require('../middleware/authMiddleware.js');
 
 // /dashboard
 router.get('/profile', requireAuth, dashboardController.profilePage);
+router.get('/profile/change-password', requireAuth, dashboardController.changePassword);
 router.get('/add-ssh-key', requireAuth, dashboardController.addShhKeyDashboard);
 
 router.get('/', requireAuth, dashboardController.mainDashboard);

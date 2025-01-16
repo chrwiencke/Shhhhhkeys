@@ -6,6 +6,10 @@ const profilePage = (req, res) => {
     res.render('profilePage', { user: req.user });
 };
 
+const changePassword = (req, res) => {
+    res.render('changePassword', { user: req.user });
+};
+
 const mainDashboard = async (req, res) => {
     const username = req.user.username;
 
@@ -182,5 +186,6 @@ module.exports = {
     addShhKeyDashboard,
     createSshKeyDashboard,
     deleteSshKeyDashboard,
-    enabledisableSshKeyDashboard
+    enabledisableSshKeyDashboard,
+    changePassword,
 };

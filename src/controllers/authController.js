@@ -312,6 +312,80 @@ const getResetPassword = async (req, res) => {
     }
 };
 
+const postChangePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword, confirmPassword } = req.body;
+        const email = req.user.email;
+
+        if (!newPassword) {
+            return res.status(400).json({ message: 'All fields are required' });
+        }
+
+        if (!currentPassword) {
+            return res.status(400).json({ message: 'All fields are required' });
+        }
+
+        if (!confirmPassword) {
+            return res.status(400).json({ message: 'All fields are required' });
+        }
+        if (newPassword !== confirmPassword) {
+            return res.status(400).json({ message: 'The password and confirmation password is not the same'})
+        }
+
+        const user = await User.findOne({ email: email });
+
+        const validPassword = await bcrypt.compare(currentPassword, user.password);
+        if (!validPassword) {
+            return res.status(400).json({ message: 'Invalid credentials' });
+        }
+
+        if (!validator.isLength(newPassword, { min: 8, max: 100 })) {
+            return res.status(400).json({ message: 'Password must be at least 8 characters long' });
+        }
+
+        if (!newPassword.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?])[A-Za-z\d!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]{8,}$/)) {
+            return res.status(400).json({ 
+                message: 'Password must contain at least one uppercase letter, one lowercase letter, one number and one special character' 
+            });
+        }
+
+        if (!user.email === email) {
+            return res.status(400).json({ message: 'User does not exist' });
+        }
+
+
+        const saltstuff = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, saltstuff);
+        
+        user.password = hashedPassword;
+
+        const resend = new Resend(process.env.RESEND_KEY)
+        
+        try {
+            const { data, error } = await resend.emails.send({
+                from: 'Shhh Pludo <notification@huzzand.buzz>',
+                to: [email],
+                subject: 'Password Changed',
+                html: `Your password has been changed`,
+            });
+
+            if (error) {
+                console.error('Email sending error:', error);
+                return res.status(400).json({ message: 'Error sending verification email' });
+            }
+        } catch (emailError) {
+            console.error('Email sending error:', emailError);
+            return res.status(400).json({ message: 'Error sending verification email' });
+        }
+
+        await user.save();
+        res.redirect('/dashboard/');
+    } catch (error) {
+        console.error('Error changing password:', error);
+        res.status(500).json({ message: 'Error changing password' });
+    }
+};
+
 const getVerify = async (req, res) => {
     try {
         const verifyToken = req.params.token;
@@ -384,6 +458,7 @@ const resetPasswordPage = async (req, res) => {
     res.render('resetPassword');
 };
 
+
 module.exports = {
     postRegister,
     postLogin,
@@ -396,4 +471,5 @@ module.exports = {
     postResetPassword,
     getResetPassword,
     emailSentPage,
+    postChangePassword,
 };
