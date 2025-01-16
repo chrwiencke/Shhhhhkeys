@@ -120,15 +120,13 @@ const postRegister = async (req, res) => {
 
 const postLogin = async (req, res) => {
     try {
-        const { username, password } = req.body;
+        const { email, password } = req.body;
         
-        if (!username || !password) {
+        if (!email || !password) {
             return res.status(400).json({ message: 'All fields are required' });
         }
-
-        const sanitizedUsername = validator.escape(username);
         
-        const user = await User.findOne({ username: sanitizedUsername });
+        const user = await User.findOne({ email });
         
         if (!user.isVerified) {
             return res.status(400).json({ message: 'Email Not Verified' });
