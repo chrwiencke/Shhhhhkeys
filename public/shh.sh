@@ -97,6 +97,11 @@ else
     DEFAULT_USER="`whoami`"
 fi
 
+# Add debug function near the top after variable declarations
+debug() {
+    echo "[DEBUG] $*" >&2
+}
+
 # First pass: extract user and flags
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -133,12 +138,14 @@ done
 [ -z "$SHH_USER" ] && SHH_USER="$LINUX_USER"
 
 # Process remaining arguments for keys
+debug "Processing arguments: $ARGS_LEFT"
 for arg in $ARGS_LEFT; do
     case "$arg" in
         */*) KEYS="$KEYS $arg" ;;
         *) KEYS="$KEYS $SHH_USER/$arg" ;;
     esac
 done
+debug "Final KEYS list: $KEYS"
 
 # Validate required arguments
 if [ -z "$LINUX_USER" ]; then
@@ -184,41 +191,54 @@ fi
 # Process key fetch results
 fetch_key() {
     KEY="$1"
-    echo "Fetching key from: https://shh.pludo.org/$KEY" >&2
-    curl -s "https://shh.pludo.org/$KEY" > "/tmp/key_$$"
-    if [ $? -ne 0 ]; then
-        echo "Error: Failed to fetch key" >&2
-        rm -f "/tmp/key_$$"
+    debug "Attempting to fetch key: $KEY"
+    
+    # Create temporary file with unique name
+    KEY_TMP="/tmp/key_fetch_$$_${RANDOM}"
+    
+    curl -S -f "https://shh.pludo.org/$KEY" > "$KEY_TMP" 2>/dev/null
+    CURL_STATUS=$?
+    
+    if [ $CURL_STATUS -ne 0 ]; then
+        debug "curl failed with status $CURL_STATUS"
+        rm -f "$KEY_TMP"
         return 1
     fi
     
-    if [ ! -s "/tmp/key_$$" ]; then
-        echo "Error: Empty key content received" >&2
-        rm -f "/tmp/key_$$"
+    if [ ! -s "$KEY_TMP" ]; then
+        debug "Received empty response"
+        rm -f "$KEY_TMP"
         return 1
     fi
     
-    if ! grep -q "^ssh-" "/tmp/key_$$"; then
-        echo "Error: Invalid SSH key format" >&2
-        rm -f "/tmp/key_$$"
+    if ! grep -q "^ssh-" "$KEY_TMP"; then
+        debug "Invalid SSH key format in response"
+        cat "$KEY_TMP" >&2  # Show invalid response for debugging
+        rm -f "$KEY_TMP"
         return 1
     fi
     
-    cat "/tmp/key_$$"
-    rm -f "/tmp/key_$$"
+    cat "$KEY_TMP"
+    rm -f "$KEY_TMP"
     return 0
 }
 
 # Key processing section
 ANY_KEYS_ADDED=0
 for key in $KEYS; do
-    KEY_FILE="/tmp/key_result_$$"
+    debug "Processing key: $key"
+    KEY_FILE="/tmp/key_result_$$_${RANDOM}"
     fetch_key "$key" > "$KEY_FILE"
-    if [ $? -eq 0 ] && [ -s "$KEY_FILE" ]; then
-        echo "Adding key: $key" >&2
+    FETCH_STATUS=$?
+    debug "fetch_key returned status: $FETCH_STATUS"
+    
+    if [ $FETCH_STATUS -eq 0 ] && [ -s "$KEY_FILE" ]; then
+        echo "Adding key: $key"
         cat "$KEY_FILE" >> "$AUTHORIZED_KEYS"
         echo "" >> "$AUTHORIZED_KEYS"
         ANY_KEYS_ADDED=1
+    else
+        debug "Failed to fetch or validate key: $key"
     fi
     rm -f "$KEY_FILE"
 done
