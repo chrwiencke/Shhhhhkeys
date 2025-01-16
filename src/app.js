@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
+const session = require('express-session');
 const lusca = require('lusca');
 const { router: indexRoutes } = require('./routes/indexRoutes.js');
 const { router: dashboardRoutes } = require('./routes/dashboardRoutes.js');
@@ -17,16 +18,26 @@ app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 * 24
+    }
+}));
+
 app.use(lusca.csrf());
 
-// Use each router separately
 app.use('/', indexRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/auth', authRoutes);
 app.use('/', key);
 
-// Replace the last part with proper connection handling
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/')
+mongoose.connect(process.env.MONGODB_URI)
     .then(() => {
         app.listen(process.env.PORT, () => {
             console.log("MongoDB Connected");
