@@ -308,7 +308,7 @@
             await copyToClipboardSilent(sshKey, button);
         } catch (err) {
             console.error('Error fetching SSH key:', err);
-            alert('Failed to fetch SSH key. Please ensure the key is accessible.');
+            alert('Failed to fetch SSH key. The key may be disabled or deleted.');
         }
     }
 
