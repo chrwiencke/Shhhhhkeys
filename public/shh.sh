@@ -58,6 +58,11 @@ case "$0" in
         TEMP_SCRIPT="/tmp/shh_install_$$"
         cat > "$TEMP_SCRIPT" || exit 1
         
+        # Fix line endings if dos2unix is available
+        if command -v dos2unix >/dev/null 2>&1; then
+            dos2unix "$TEMP_SCRIPT" >/dev/null 2>&1
+        fi
+        
         echo "Installing Shhhhhkeys utility to /usr/local/bin/shh..."
         if [ "`id -u`" = "0" ]; then
             # Running as root/sudo
