@@ -184,6 +184,7 @@ fi
 # Process key fetch results
 fetch_key() {
     KEY="$1"
+    echo "Fetching key from: https://shh.pludo.org/$KEY" >&2
     KEY_TMP="/tmp/key_fetch_$$_${RANDOM}"
     
     curl -S -f "https://shh.pludo.org/$KEY" > "$KEY_TMP" 2>/dev/null
@@ -214,16 +215,16 @@ fetch_key() {
 ANY_KEYS_ADDED=0
 for key in $KEYS; do
     KEY_FILE="/tmp/key_result_$$_${RANDOM}"
-    fetch_key "$key" > "$KEY_FILE"
+    fetch_key "$key" > "$KEY_FILE" 2>&1
     FETCH_STATUS=$?
     
     if [ $FETCH_STATUS -eq 0 ] && [ -s "$KEY_FILE" ]; then
-        echo "Adding key: $key"
+        echo "Adding key: $key" >&2
         cat "$KEY_FILE" >> "$AUTHORIZED_KEYS"
         echo "" >> "$AUTHORIZED_KEYS"
         ANY_KEYS_ADDED=1
     else
-        echo "Failed to fetch or validate key: $key"
+        echo "Failed to fetch or validate key: $key" >&2
     fi
     rm -f "$KEY_FILE"
 done
