@@ -1,70 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const ShhKey = require('../models/shhkey.js');
 
-router.get('/:user/keys', async (req, res) => {
-    try {
-        const user = req.params.user;
+const keyController = require('../controllers/keyController.js');
+const { generalLimiter } = require('../middleware/generalRatelimter.js');
 
-        if (!user) {
-            return res.status(400).json({ message: 'No user found' });
-        }
-        
-        const data = await ShhKey.find({ username: user });
+router.get('/:user/keys', generalLimiter, keyController.getSshKeys);
 
-        if (data.length === 0) {
-            return res.status(404).json({ message: 'SSH Keys not found' });
-        }
-
-        let allKeys = "";
-        
-        data.forEach(document => {
-            if (document.shareable) {
-                allKeys += document.key + "\n";
-            }
-        });            
-        console.log(allKeys)
-        if (!allKeys) {
-            return res.status(404).json({ message: 'No shareable SSH keys found' });
-        }
-        
-        allKeys = allKeys.trim();
-
-        res.send(allKeys);
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: 'Error retrieving SSH Keys' });
-    }
-});
-
-router.get('/:user/:title', async (req, res) => {
-    try {
-        const title = req.params.title;
-        const user = req.params.user;
-
-        if (!title) {
-            return res.status(400).json({ message: 'No title found' });
-        }
-        if (!user) {
-            return res.status(400).json({ message: 'No user found' });
-        }
-
-        const data = await ShhKey.findOne({ username: user, title });
-        
-        if (!data) {
-            return res.status(404).json({ message: 'SSH Key not found' });
-        }
-
-        if (!data.shareable) {
-            return res.status(403).json({ message: 'SSH Key is disabled' });
-        }
-
-        const sshKey = data.key;
-        res.send(sshKey);
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: 'Error retrieving SSH Key' });
-    }
-});
+router.get('/:user/:title', generalLimiter, keyController.getSshKey);
 
 exports.router = router;
