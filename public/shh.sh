@@ -182,31 +182,42 @@ if ! chmod 600 "$AUTHORIZED_KEYS" 2>/dev/null; then
     exit 1
 fi
 
-for key in $KEYS; do
-    echo "Fetching key from: https://shh.pludo.org/$key"
-    RESPONSE=`curl -s -w "\n%{http_code}" "https://shh.pludo.org/$key"`
+# Process key fetch results
+fetch_key() {
+    KEY="$1"
+    echo "Fetching key from: https://shh.pludo.org/$KEY"
+    RESPONSE=`curl -s -w "\n%{http_code}" "https://shh.pludo.org/$KEY"`
     HTTP_CODE=`echo "$RESPONSE" | tail -n1`
     KEY_CONTENT=`echo "$RESPONSE" | sed '$d'`
     
     if [ "$HTTP_CODE" != "200" ]; then
-        echo "Error: Failed to fetch key from https://shh.pludo.org/$key (HTTP $HTTP_CODE)"
-        continue
+        echo "Error: Failed to fetch key - HTTP code $HTTP_CODE"
+        return 1
     fi
     
     if [ -z "$KEY_CONTENT" ]; then
-        echo "Error: Empty key content received for $key"
-        continue
+        echo "Error: Empty key content received"
+        return 1
     fi
     
     if ! echo "$KEY_CONTENT" | grep -q "^ssh-"; then
-        echo "Error: Invalid SSH key format received for $key"
-        echo "Content received: $KEY_CONTENT"
-        continue
+        echo "Error: Invalid SSH key format"
+        return 1
     fi
     
-    echo "Adding key: $key"
-    echo "$KEY_CONTENT" >> "$AUTHORIZED_KEYS"
-    echo "" >> "$AUTHORIZED_KEYS"
+    echo "$KEY_CONTENT"
+    return 0
+}
+
+# Key processing section
+for key in $KEYS; do
+    echo "Processing key: $key"
+    KEY_CONTENT=`fetch_key "$key"`
+    if [ $? -eq 0 ]; then
+        echo "Adding key: $key"
+        echo "$KEY_CONTENT" >> "$AUTHORIZED_KEYS"
+        echo "" >> "$AUTHORIZED_KEYS"
+    fi
 done
 
 # Verify keys were added
