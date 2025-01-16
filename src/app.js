@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
+const lusca = require('lusca');
 const { router: indexRoutes } = require('./routes/indexRoutes.js');
 const { router: dashboardRoutes } = require('./routes/dashboardRoutes.js');
 const { router: authRoutes } = require('./routes/authRoutes.js');
@@ -16,6 +17,7 @@ app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(lusca.csrf());
 
 // Use each router separately
 app.use('/', indexRoutes);
