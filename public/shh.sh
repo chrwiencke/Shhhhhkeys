@@ -56,10 +56,10 @@ SHH_USER=""
 case "$0" in
     sh|*/sh)
         TEMP_SCRIPT="/tmp/shh_install_$$"
-        tr -d '\r' > "$TEMP_SCRIPT" || exit 1
+        cat | sed 's/\r$//' > "$TEMP_SCRIPT" || exit 1
         
         echo "Installing Shhhhhkeys utility to /usr/local/bin/shh..."
-        if [ "`id -u`" = "0" ]; then
+        if [ "$(id -u)" = "0" ]; then
             install -m 755 "$TEMP_SCRIPT" "/usr/local/bin/shh"
         else
             sudo install -m 755 "$TEMP_SCRIPT" "/usr/local/bin/shh"
@@ -87,14 +87,14 @@ USE_U_FLAG=0
 ARGS_LEFT=""
 
 # Fix root user home directory first
-if [ "`id -u`" = "0" ]; then
+if [ "$(id -u)" = "0" ]; then
     if [ -n "$SUDO_USER" ]; then
         DEFAULT_USER="$SUDO_USER"
     else
         DEFAULT_USER="root"
     fi
 else
-    DEFAULT_USER="`whoami`"
+    DEFAULT_USER="$(whoami)"
 fi
 
 # First pass: extract user and flags
