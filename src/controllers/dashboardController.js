@@ -1,4 +1,5 @@
 const ShhKey = require('../models/shhkey.js');
+const socialKeys = require('../models/socialKeys.js');
 const ShhKeyBlacklist = require('../models/sshkeytitleblacklist.js');
 const validator = require('validator');
 
@@ -18,11 +19,21 @@ const mainDashboard = async (req, res) => {
         'title key shareable createdAt'
     );
     
-    res.render('dashboard/mainPage', { userKeys, user: req.user });
+    const userSocialKeys = await socialKeys.find(
+        { username: username },
+        'link'
+    );
+
+    res.render('dashboard/mainPage', { userKeys, userSocialKeys, user: req.user });
 };
+
 
 const addShhKeyDashboard = async (req, res) => {
     res.render('dashboard/addShhKey', { user: req.user });
+};
+
+const addSocialShhKeyDashboard = async (req, res) => {
+    res.render('dashboard/addSocialShhKey', { user: req.user });
 };
 
 const createSshKeyDashboard = async (req, res) => {
@@ -180,6 +191,85 @@ const enabledisableSshKeyDashboard = async (req, res) => {
     }
 };
 
+const createSocialSshKeyDashboard = async (req, res) => {
+    try {
+        let { link } = req.body;
+        const username = req.user.username;
+
+        if (!link) {
+            return res.status(400).json({ message: 'Link is required' });
+        }
+
+        link = link.replace(/\/+$/, '');
+
+        const linkRegex = /^(https?:\/\/)?(shh\.pludo\.org)(\/[a-zA-Z0-9-_]+\/[a-zA-Z0-9-_]+)$/;
+        const match = link.match(linkRegex);
+
+        if (!match) {
+            return res.status(400).json({ 
+                message: 'Invalid link format. Must be a valid shh.pludo.org URL with user/title pattern' 
+            });
+        }
+
+        link = `https://${match[2]}${match[3]}`;
+
+        const linkExists = await socialKeys.findOne({ username, link });
+        if (linkExists) {
+            return res.status(400).json({ message: 'Link already exists' });
+        }
+
+        const userKeyCount = await socialKeys.countDocuments({ username });
+        const MAX_LINKS_PER_USER = 1088;
+        
+        if (userKeyCount >= MAX_LINKS_PER_USER) {
+            return res.status(400).json({ 
+                message: `Maximum number of SSH keys (${MAX_LINKS_PER_USER}) reached` 
+            });
+        }
+
+        const createdAt = new Date();
+        const newSocialkey = new socialKeys({
+            username,
+            link,
+            createdAt
+        });
+        
+        await newSocialkey.save();
+
+        res.redirect('/dashboard/');
+    } catch (error) {
+        console.error('Social Key creation error:', error);
+        res.status(500).json({ message: 'Error creating Social SSH Key' });
+    }
+};
+
+const deleteSocialSshKeyDashboard = async (req, res) => {
+    try {
+        const username = req.user.username;
+        const id = req.params['id'];
+
+        if (!validator.isMongoId(id)) {
+            return res.status(400).json({ message: 'Invalid ID format' });
+        }
+
+        const idExists = await socialKeys.findOne({ _id: id });
+
+        if (!idExists) {
+            return res.status(400).json({ message: 'ID does not exist' });
+        }
+
+        if (idExists.username !== username) {
+            return res.status(403).json({ message: 'Not authorized' });
+        }
+
+        await socialKeys.deleteOne({ _id: id });
+        res.redirect('/dashboard/');
+    } catch (error) {
+        console.error('SSH Key deletion error:', error);
+        res.status(500).json({ message: 'Error deleting SSH Key' });
+    }
+};
+
 module.exports = {
     profilePage,
     mainDashboard,
@@ -188,4 +278,7 @@ module.exports = {
     deleteSshKeyDashboard,
     enabledisableSshKeyDashboard,
     changePassword,
+    addSocialShhKeyDashboard,
+    createSocialSshKeyDashboard,
+    deleteSocialSshKeyDashboard,
 };
