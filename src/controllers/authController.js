@@ -172,7 +172,7 @@ const postResetPassword = async (req, res) => {
             return res.status(400).json({ message: 'Email required' });
         }
 
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email: { $eq: email } });
 
         if (!user) {
             return res.status(400).json({ message: 'Email is not associated with a user' });
