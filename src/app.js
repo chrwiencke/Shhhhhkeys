@@ -23,9 +23,16 @@ app.use('/dashboard', dashboardRoutes);
 app.use('/auth', authRoutes);
 app.use('/', key);
 
-app.listen(process.env.PORT, () => {
-    mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/');
-    console.log("Listening on PORT: " + process.env.PORT)
-})
+// Replace the last part with proper connection handling
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/')
+    .then(() => {
+        app.listen(process.env.PORT, () => {
+            console.log("MongoDB Connected");
+            console.log("Listening on PORT: " + process.env.PORT);
+        });
+    })
+    .catch((err) => {
+        console.log("MongoDB did not connect:", err.message);
+    });
 
 module.exports = app;
