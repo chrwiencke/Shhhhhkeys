@@ -83,6 +83,15 @@ case "$0" in
         ;;
 esac
 
+# Show usage if no arguments provided
+if [ $# -eq 0 ]; then
+    echo "Usage: $0 linux_user title [title2...] [-s shhkeys_user]"
+    echo "   or: $0 linux_user user/title [user2/title2...] "
+    echo "   or: $0 -u linux_user [-s shhkeys_user] title [title2...]"
+    echo "   or: $0 -s shhkeys_user linux_user title [title2...]"
+    exit 1
+fi
+
 if [ "$1" = "-s" ]; then
     if [ "$#" -lt 4 ]; then
         echo "Usage with -s: $0 -s shhkeys_user linux_user title [title2] ..."
