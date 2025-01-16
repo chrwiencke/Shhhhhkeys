@@ -92,20 +92,38 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
+# First validate Linux user for all cases
+case "$1" in
+    "-s")
+        if [ "$#" -lt 4 ]; then
+            echo "Usage with -s: $0 -s shhkeys_user linux_user title [title2] ..."
+            exit 1
+        fi
+        LINUX_USER="$3"
+        ;;
+    "-u")
+        if [ "$#" -lt 3 ]; then
+            echo "Usage with -u: $0 -u linux_user [-s shhkeys_user] title [title2] ..."
+            exit 1
+        fi
+        LINUX_USER="$2"
+        ;;
+    *)
+        LINUX_USER="$1"
+        ;;
+esac
+
+# Validate Linux user exists and has a valid home directory
+USER_HOME=`getent passwd "$LINUX_USER" | cut -d: -f6`
+if [ -z "$USER_HOME" ] || [ ! -d "$USER_HOME" ]; then
+    echo "Error: User '$LINUX_USER' does not exist or does not have a valid home directory."
+    exit 1
+fi
+
+# Now process remaining arguments
 if [ "$1" = "-s" ]; then
-    if [ "$#" -lt 4 ]; then
-        echo "Usage with -s: $0 -s shhkeys_user linux_user title [title2] ..."
-        exit 1
-    fi
     SHH_USER="$2"
-    LINUX_USER="$3"
     shift 3
-    
-    if ! id "$LINUX_USER" >/dev/null 2>&1; then
-        echo "Error: Linux user '$LINUX_USER' does not exist"
-        exit 1
-    fi
-    
     while [ "$#" -gt 0 ]; do
         case "$1" in
             */*) 
@@ -189,13 +207,6 @@ else
         esac
         shift
     done
-fi
-
-USER_HOME=$(getent passwd "$LINUX_USER" | cut -d: -f6)
-
-if [ -z "$USER_HOME" ] || [ ! -d "$USER_HOME" ]; then
-    echo "Error: User '$LINUX_USER' does not exist or does not have a valid home directory."
-    exit 1
 fi
 
 SSH_DIR="$USER_HOME/.ssh"
