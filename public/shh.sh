@@ -223,9 +223,9 @@ fi
 
 for key in $KEYS; do
     echo "Fetching key from: https://shh.pludo.org/$key"
-    RESPONSE=$(curl -s -w "\n%{http_code}" "https://shh.pludo.org/$key")
-    HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
-    KEY_CONTENT=$(echo "$RESPONSE" | sed '$d')
+    RESPONSE=`curl -s -w "\n%{http_code}" "https://shh.pludo.org/$key"`
+    HTTP_CODE=`echo "$RESPONSE" | tail -n1`
+    KEY_CONTENT=`echo "$RESPONSE" | sed '$d'`
     
     if [ "$HTTP_CODE" != "200" ]; then
         echo "Error: Failed to fetch key from https://shh.pludo.org/$key (HTTP $HTTP_CODE)"
