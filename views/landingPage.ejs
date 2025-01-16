@@ -142,31 +142,38 @@
                 <div class="bg-gray-800 rounded-lg p-6 overflow-x-auto">
                     <h3 class="text-xl text-white mb-4">Quick Download</h3>
                     <pre class="text-gray-100 font-mono">
-<span class="text-green-400"># Download a single SSH key</span>
+<span class="text-green-400"># Download a single SSH key and add it to your authorized_keys file</span>
 curl https://shh.pludo.org/<%= user.username %>/title >> ~/.ssh/authorized_keys
 
-<span class="text-green-400"># Download all SSH keys for a user</span>
+<span class="text-green-400"># Download all SSH keys for a user and add them to your authorized_keys file</span>
 curl https://shh.pludo.org/<%= user.username %>/keys >> ~/.ssh/authorized_keys</pre>
                 </div>
 
                 <!-- Utility Usage -->
                 <div class="bg-gray-800 rounded-lg p-6 overflow-x-auto">
                     <h3 class="text-xl text-white mb-4">Using the SSH Key Utility</h3>
+                    <p class="text-gray-400 mb-4">All commands will add the specified keys to the Linux user's ~/.ssh/authorized_keys file.</p>
                     <pre class="text-gray-100 font-mono">
 <span class="text-green-400"># Download and prepare the utility</span>
-sudo wget -O - https://shh.pludo.org/shh.sh | sh
+wget https://shh.pludo.org/shh.sh
+sudo install -m 755 shh.sh /usr/local/bin/shh
 
-<span class="text-green-400"># Basic usage (with user/title format)</span>
-./shh.sh linuxuser user1/key1 user2/key2
+<span class="text-green-400"># 2. Basic usage</span>
+shh &lt;linux-user&gt; &lt;key-identifier&gt;...
 
-<span class="text-green-400"># Using -u flag (simple format)</span>
-./shh.sh -u linuxuser key1 key2  <span class="text-gray-400"># Gets linuxuser/key1 and linuxuser/key2</span>
+<span class="text-green-400"># Examples:</span>
+# Add a single key
+shh johndoe user1/work-laptop
 
-<span class="text-green-400"># Using -s flag to specify SSH key username</span>
-./shh.sh -s sshuser linuxuser key1 key2  <span class="text-gray-400"># Gets sshuser/key1 and sshuser/key2</span>
+# Add multiple keys
+shh johndoe alice/key1 bob/key2
 
-<span class="text-green-400"># Mixed format with -s flag</span>
-./shh.sh linuxuser key1 user2/key2 -s sshuser key3</pre>
+<span class="text-green-400"># Shortcuts:</span>
+# -u flag: Use same username for all keys
+shh -u johndoe laptop desktop
+
+# -s flag: Specify a single SSH key username for all keys
+shh -s alice johndoe key1 key2</pre>
                 </div>
 
             </div>
