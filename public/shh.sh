@@ -92,6 +92,16 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
+# Fix root user home directory
+if [ "`id -u`" = "0" ]; then
+    if [ -n "$SUDO_USER" ]; then
+        LINUX_USER="$SUDO_USER"
+    else
+        echo "Error: When running as root, please specify the target user"
+        exit 1
+    fi
+fi
+
 # First validate Linux user for all cases
 case "$1" in
     "-s")
@@ -100,6 +110,8 @@ case "$1" in
             exit 1
         fi
         LINUX_USER="$3"
+        SHH_USER="$2"
+        shift 3
         ;;
     "-u")
         if [ "$#" -lt 3 ]; then
@@ -107,9 +119,13 @@ case "$1" in
             exit 1
         fi
         LINUX_USER="$2"
+        SHH_USER="$2"  # Default to linux user
+        shift 2
         ;;
     *)
         LINUX_USER="$1"
+        SHH_USER="$1"  # Default to linux user
+        shift
         ;;
 esac
 
@@ -120,93 +136,32 @@ if [ -z "$USER_HOME" ] || [ ! -d "$USER_HOME" ]; then
     exit 1
 fi
 
-# Now process remaining arguments
-if [ "$1" = "-s" ]; then
-    SHH_USER="$2"
-    shift 3
-    while [ "$#" -gt 0 ]; do
-        case "$1" in
-            */*) 
-                echo "Error: When using -s, titles should not contain '/'. Got: $1"
-                exit 1
-                ;;
-            *) KEYS="$KEYS $SHH_USER/$1" ;;
-        esac
-        shift
-    done
-elif [ "$1" = "-u" ]; then
-    if [ "$#" -lt 3 ]; then
-        echo "Usage with -u: $0 -u linux_user [-s shhkeys_user] title [title2] ..."
-        exit 1
-    fi
-    LINUX_USER="$2"
-    shift 2
-    
-    if [ "$1" = "-s" ]; then
-        if [ "$#" -lt 2 ]; then
-            echo "Error: -s option requires a username"
-            exit 1
-        fi
-        SHH_USER="$2"
-        shift 2
-    else
-        SHH_USER="$LINUX_USER"
-    fi
-    
-    while [ "$#" -gt 0 ]; do
-        case "$1" in
-            */*) 
-                echo "Error: When using -u, titles should not contain '/'. Got: $1"
-                exit 1
-                ;;
-            *) KEYS="$KEYS $SHH_USER/$1" ;;
-        esac
-        shift
-    done
-else
-    if [ "$#" -lt 2 ]; then
-        echo "Usage: $0 linux_user title [title2...] [-s shhkeys_user]"
-        echo "   or: $0 linux_user user/title [user2/title2...] "
-        echo "   or: $0 -u linux_user [-s shhkeys_user] title [title2...]"
-        echo "   or: $0 -s shhkeys_user linux_user title [title2...]"
-        exit 1
-    fi
-    LINUX_USER="$1"
-    shift
-
-    while [ "$#" -gt 0 ]; do
-        if [ "$1" = "-s" ]; then
+# Process remaining arguments for keys
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        "-s")
             if [ "$#" -lt 2 ]; then
                 echo "Error: -s option requires a username"
                 exit 1
             fi
             SHH_USER="$2"
             shift 2
-            break
-        fi
-        case "$1" in
-            */*) KEYS="$KEYS $1" ;;
-            *) 
-                if [ -n "$SHH_USER" ]; then
-                    KEYS="$KEYS $SHH_USER/$1"
-                else
-                    KEYS="$KEYS $LINUX_USER/$1"
-                fi
-                ;;
-        esac
-        shift
-    done
+            ;;
+        */*) 
+            KEYS="$KEYS $1"
+            shift
+            ;;
+        *) 
+            KEYS="$KEYS $SHH_USER/$1"
+            shift
+            ;;
+    esac
+done
 
-    while [ "$#" -gt 0 ]; do
-        case "$1" in
-            */*) 
-                echo "Error: After -s flag, titles should not contain '/'. Got: $1"
-                exit 1
-                ;;
-            *) KEYS="$KEYS $SHH_USER/$1" ;;
-        esac
-        shift
-    done
+# Validate we have keys to process
+if [ -z "$KEYS" ]; then
+    echo "Error: No keys specified"
+    exit 1
 fi
 
 SSH_DIR="$USER_HOME/.ssh"
