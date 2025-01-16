@@ -55,8 +55,15 @@ SHH_USER=""
 # Self-installation when downloaded via wget
 if [ "$0" = "sh" ] || echo "$0" | grep -q "wget"; then
     TEMP_SCRIPT="/tmp/shh_install_$$"
-    cat > "$TEMP_SCRIPT"
-    chmod 755 "$TEMP_SCRIPT"
+    # Ensure we get the complete script
+    cat > "$TEMP_SCRIPT" || exit 1
+    
+    # Validate script content
+    if ! sh -n "$TEMP_SCRIPT"; then
+        echo "Error: Invalid script content"
+        rm -f "$TEMP_SCRIPT"
+        exit 1
+    fi
     
     echo "Installing Shhhhhkeys utility to /usr/local/bin/shh..."
     if [ "$(id -u)" = "0" ]; then
@@ -74,6 +81,14 @@ if [ "$0" = "sh" ] || echo "$0" | grep -q "wget"; then
             exit 1
         fi
     fi
+    
+    # Verify installed script
+    if ! sh -n "/usr/local/bin/shh"; then
+        echo "Error: Installation verification failed"
+        rm -f "$TEMP_SCRIPT"
+        exit 1
+    fi
+    
     rm -f "$TEMP_SCRIPT"
     echo "Installation successful! You can now use 'shh' command."
     exit 0
