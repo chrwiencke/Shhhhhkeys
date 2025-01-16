@@ -184,7 +184,7 @@ fi
 # Process key fetch results
 fetch_key() {
     KEY="$1"
-    echo "# Fetching key from: https://shh.pludo.org/$KEY" >&2
+    echo "# Fetched from: https://shh.pludo.org/$KEY" >&2
     KEY_TMP="/tmp/key_fetch_$$_${RANDOM}"
     
     curl -S -f "https://shh.pludo.org/$KEY" > "$KEY_TMP" 2>/dev/null
