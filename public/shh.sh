@@ -223,11 +223,11 @@ fetch_key() {
 # Key processing section
 ANY_KEYS_ADDED=0
 for key in $KEYS; do
-    KEY_CONTENT=`fetch_key "$key"`
+    KEY_CONTENT=$(fetch_key "$key")
     RC=$?
     if [ $RC -eq 0 ] && [ -n "$KEY_CONTENT" ]; then
         echo "Adding key: $key" >&2
-        printf "%s\n\n" "$KEY_CONTENT" >> "$AUTHORIZED_KEYS"
+        printf '%s\n\n' "$KEY_CONTENT" >> "$AUTHORIZED_KEYS"
         ANY_KEYS_ADDED=1
     fi
 done
