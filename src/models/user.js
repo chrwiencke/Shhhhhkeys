@@ -20,10 +20,16 @@ const userSchema = new mongoose.Schema({
         required: true,
         default: false
     },
-    verificationToken: {
+    verificationTokenEmail: {
         type: String,
-        required: true,
-    }
+        required: false,
+        default: undefined
+    },
+    verificationTokenPassword: {
+        type: String,
+        required: false,
+        default: undefined
+    },
 });
 
 module.exports = mongoose.model('User', userSchema);

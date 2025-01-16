@@ -59,7 +59,7 @@ const postRegister = async (req, res) => {
             username,
             email,
             password: hashedPassword,
-            verificationToken: verificationToken
+            verificationTokenEmail: verificationToken
         });
         
         const verificationUrl = `https://shh.pludo.org/auth/verify-email/${verificationToken}`;
@@ -111,7 +111,7 @@ const postRegister = async (req, res) => {
 
         await user.save();
 
-        res.redirect('/auth/login');
+        res.redirect('/auth/email-sent');
     } catch (error) {
         console.error('Registration error:', error);
         res.status(500).json({ message: 'Error creating user' });
@@ -187,8 +187,35 @@ const postResetPassword = async (req, res) => {
             const { data, error } = await resend.emails.send({
                 from: 'Shhh Pludo <verify@huzzand.buzz>',
                 to: [email],
-                subject: 'reset password',
-                html: verificationUrl,
+                subject: 'Reset Your Password - Shhhhkeys',
+                html: `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f4f5; font-family: Arial, sans-serif;">
+    <table role="presentation" style="width: 100%; border-collapse: collapse;">
+        <tr>
+            <td align="center" style="padding: 40px 0;">
+                <table role="presentation" style="width: 90%; max-width: 600px; border-collapse: collapse; background-color: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+                    <tr>
+                        <td style="padding: 40px 30px; text-align: center;">
+                            <h1 style="color: #1f2937; margin-bottom: 20px; font-size: 24px;">Reset Your Password</h1>
+                            <p style="color: #4b5563; margin-bottom: 30px; font-size: 16px;">We received a request to reset your password. Click the button below to proceed with the reset process.</p>
+                            <a href="${verificationUrl}" style="display: inline-block; background-color: #4f46e5; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-bottom: 20px;">Reset Password</a>
+                            <p style="color: #6b7280; font-size: 14px; margin-top: 20px;">If the button doesn't work, copy and paste this link into your browser:</p>
+                            <p style="color: #4f46e5; font-size: 14px; word-break: break-all;">${verificationUrl}</p>
+                            <p style="color: #9ca3af; font-size: 12px; margin-top: 40px;">If you didn't request a password reset, you can safely ignore this email.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`,
             });
 
             if (error) {
@@ -200,7 +227,7 @@ const postResetPassword = async (req, res) => {
             return res.status(400).json({ message: 'Error sending verification email' });
         }
 
-        user.verificationToken = verificationToken;
+        user.verificationTokenPassword = verificationToken;
         await user.save();
 
         res.redirect('/auth/email-sent');
@@ -215,7 +242,7 @@ const getResetPassword = async (req, res) => {
     try {
         const verifyToken = req.params.token;
 
-        const userToken = await User.findOne({ verificationToken: verifyToken });
+        const userToken = await User.findOne({ verificationTokenPassword: verifyToken });
 
         if (!userToken) {
             return res.status(400).json({message: 'Invalid verification token'});
@@ -228,7 +255,7 @@ const getResetPassword = async (req, res) => {
         const hashedPassword = await bcrypt.hash(tempPassword, saltstuff);
 
         userToken.password = hashedPassword;
-        userToken.verificationToken = "verified";
+        userToken.verificationTokenPassword = undefined;
 
         const resend = new Resend(process.env.RESEND_KEY)
         
@@ -236,8 +263,36 @@ const getResetPassword = async (req, res) => {
             const { data, error } = await resend.emails.send({
                 from: 'Shhh Pludo <verify@huzzand.buzz>',
                 to: [userEmail],
-                subject: 'Password Reset',
-                html: "Your password has been reset, here is your temporary password: " + tempPassword,
+                subject: 'Your New Temporary Password - Shhhhkeys',
+                html: `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f4f5; font-family: Arial, sans-serif;">
+    <table role="presentation" style="width: 100%; border-collapse: collapse;">
+        <tr>
+            <td align="center" style="padding: 40px 0;">
+                <table role="presentation" style="width: 90%; max-width: 600px; border-collapse: collapse; background-color: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+                    <tr>
+                        <td style="padding: 40px 30px; text-align: center;">
+                            <h1 style="color: #1f2937; margin-bottom: 20px; font-size: 24px;">Password Reset Successful</h1>
+                            <p style="color: #4b5563; margin-bottom: 30px; font-size: 16px;">Your password has been reset successfully. Here is your temporary password:</p>
+                            <div style="background-color: #f3f4f6; padding: 15px; border-radius: 6px; margin: 20px 0;">
+                                <code style="color: #4f46e5; font-size: 18px; font-family: monospace;">${tempPassword}</code>
+                            </div>
+                            <p style="color: #4b5563; margin-top: 20px; font-size: 16px;">Please login with this temporary password and change it immediately in your account settings.</p>
+                            <p style="color: #9ca3af; font-size: 12px; margin-top: 40px;">For security reasons, please do not share this password with anyone.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`,
             });
 
             if (error) {
@@ -261,14 +316,14 @@ const getVerify = async (req, res) => {
     try {
         const verifyToken = req.params.token;
 
-        const userToken = await User.findOne({ verificationToken: verifyToken });
+        const userToken = await User.findOne({ verificationTokenEmail: verifyToken });
 
         if (!userToken) {
             return res.status(400).json({message: 'Invalid verification token'});
         }
 
         userToken.isVerified = true;
-        userToken.verificationToken = "verified";
+        userToken.verificationTokenEmail = undefined;
 
         await userToken.save();
         res.redirect('/auth/verified');
