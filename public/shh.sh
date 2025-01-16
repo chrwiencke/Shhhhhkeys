@@ -95,55 +95,47 @@ fi
 LINUX_USER=""
 KEYS=""
 SHH_USER=""
-FOUND_USER=0
+USE_U_FLAG=0
+ARGS_LEFT=""
 
-# Parse all arguments first to find flags
-for arg in "$@"; do
-    case "$arg" in
-        "-u"|"-s") FOUND_FLAG=1 ;;
-    esac
-done
-
-# Process arguments
+# First pass: extract user and flags
 while [ $# -gt 0 ]; do
     case "$1" in
         "-u")
-            if [ $FOUND_USER -eq 0 ]; then
+            USE_U_FLAG=1
+            if [ -z "$LINUX_USER" ] && [ $# -gt 1 ]; then
+                LINUX_USER="$2"
+                SHH_USER="$2"
                 shift
-                LINUX_USER="$1"
-                SHH_USER="$1"
-                FOUND_USER=1
-            else
-                SHH_USER="$LINUX_USER"
             fi
-            shift
             ;;
         "-s")
-            shift
-            if [ $# -eq 0 ]; then
-                echo "Error: -s option requires a username"
-                exit 1
-            fi
-            SHH_USER="$1"
-            if [ $FOUND_USER -eq 0 ] && [ $# -gt 1 ]; then
+            if [ $# -gt 1 ]; then
+                SHH_USER="$2"
                 shift
-                LINUX_USER="$1"
-                FOUND_USER=1
             fi
-            shift
             ;;
         *)
-            if [ $FOUND_USER -eq 0 ]; then
+            if [ -z "$LINUX_USER" ]; then
                 LINUX_USER="$1"
                 [ -z "$SHH_USER" ] && SHH_USER="$1"
-                FOUND_USER=1
-                shift
             else
-                case "$1" in
-                    */*) KEYS="$KEYS $1" ;;
-                    *) KEYS="$KEYS $SHH_USER/$1" ;;
-                esac
-                shift
+                ARGS_LEFT="$ARGS_LEFT $1"
+            fi
+            ;;
+    esac
+    shift
+done
+
+# Process remaining arguments for keys
+for arg in $ARGS_LEFT; do
+    case "$arg" in
+        */*) KEYS="$KEYS $arg" ;;
+        *) 
+            if [ -n "$SHH_USER" ]; then
+                KEYS="$KEYS $SHH_USER/$arg"
+            else
+                KEYS="$KEYS $LINUX_USER/$arg"
             fi
             ;;
     esac
