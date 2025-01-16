@@ -12,10 +12,15 @@ router.post('/register', authController.postRegister);
 
 router.post('/login', loginLimiter, authController.postLogin);
 
+router.post('/reset-password', loginLimiter, authController.postResetPassword);
+
 router.get('/verify-email/:token', authController.getVerify);
+router.get('/verify-password/:token', authController.getResetPassword);
 
 router.get('/logout', authController.logout);
 router.get('/verified', authController.verifiedPage);
+router.get('/email-sent', authController.emailSentPage);
+router.get('/reset-password', authController.resetPasswordPage);
 
 module.exports = { router };
 exports.router = router;

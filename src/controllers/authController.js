@@ -166,6 +166,97 @@ const postLogin = async (req, res) => {
     }
 };
 
+const postResetPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        
+        if (!email) {
+            return res.status(400).json({ message: 'Email required' });
+        }
+
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(400).json({ message: 'Email is not associated with a user' });
+        }
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+        const verificationUrl = `https://shh.pludo.org/auth/verify-password/${verificationToken}`;
+        const resend = new Resend(process.env.RESEND_KEY)
+        
+        try {
+            const { data, error } = await resend.emails.send({
+                from: 'Shhh Pludo <verify@huzzand.buzz>',
+                to: [email],
+                subject: 'reset password',
+                html: verificationUrl,
+            });
+
+            if (error) {
+                console.error('Email sending error:', error);
+                return res.status(400).json({ message: 'Error sending verification email' });
+            }
+        } catch (emailError) {
+            console.error('Email sending error:', emailError);
+            return res.status(400).json({ message: 'Error sending verification email' });
+        }
+
+        user.verificationToken = verificationToken;
+        await user.save();
+
+        res.redirect('/auth/email-sent');
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({ message: 'Error logging in' });
+    }
+};
+
+
+const getResetPassword = async (req, res) => {
+    try {
+        const verifyToken = req.params.token;
+
+        const userToken = await User.findOne({ verificationToken: verifyToken });
+
+        if (!userToken) {
+            return res.status(400).json({message: 'Invalid verification token'});
+        }
+
+        const userEmail = userToken.email
+        const tempPassword = crypto.randomBytes(12).toString('hex');
+
+        const saltstuff = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(tempPassword, saltstuff);
+
+        userToken.password = hashedPassword;
+        userToken.verificationToken = "verified";
+
+        const resend = new Resend(process.env.RESEND_KEY)
+        
+        try {
+            const { data, error } = await resend.emails.send({
+                from: 'Shhh Pludo <verify@huzzand.buzz>',
+                to: [userEmail],
+                subject: 'Password Reset',
+                html: "Your password has been reset, here is your temporary password: " + tempPassword,
+            });
+
+            if (error) {
+                console.error('Email sending error:', error);
+                return res.status(400).json({ message: 'Error sending verification email' });
+            }
+        } catch (emailError) {
+            console.error('Email sending error:', emailError);
+            return res.status(400).json({ message: 'Error sending verification email' });
+        }
+
+        await userToken.save();
+        res.redirect('/auth/email-sent');
+    } catch (error) {
+        console.error('Error verifying email:', error);
+        res.status(500).json({ message: 'Error verifying email' });
+    }
+};
+
 const getVerify = async (req, res) => {
     try {
         const verifyToken = req.params.token;
@@ -230,6 +321,14 @@ const verifiedPage = (req, res) => {
     res.render('verified');
 };
 
+const emailSentPage = (req, res) => {
+    res.render('emailSent');
+};
+
+const resetPasswordPage = async (req, res) => {
+    res.render('resetPassword');
+};
+
 module.exports = {
     postRegister,
     postLogin,
@@ -238,4 +337,8 @@ module.exports = {
     logout,
     getVerify,
     verifiedPage,
+    resetPasswordPage,
+    postResetPassword,
+    getResetPassword,
+    emailSentPage,
 };
