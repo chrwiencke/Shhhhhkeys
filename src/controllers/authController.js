@@ -365,8 +365,33 @@ const postChangePassword = async (req, res) => {
             const { data, error } = await resend.emails.send({
                 from: 'Shhh Pludo <notification@huzzand.buzz>',
                 to: [email],
-                subject: 'Password Changed',
-                html: `Your password has been changed`,
+                subject: 'Password Changed - Shhhhkeys',
+                html: `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f4f5; font-family: Arial, sans-serif;">
+    <table role="presentation" style="width: 100%; border-collapse: collapse;">
+        <tr>
+            <td align="center" style="padding: 40px 0;">
+                <table role="presentation" style="width: 90%; max-width: 600px; border-collapse: collapse; background-color: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+                    <tr>
+                        <td style="padding: 40px 30px; text-align: center;">
+                            <h1 style="color: #1f2937; margin-bottom: 20px; font-size: 24px;">Password Changed Successfully</h1>
+                            <p style="color: #4b5563; margin-bottom: 30px; font-size: 16px;">Your password has been successfully changed. If you did not make this change, please take immediate action to secure your account.</p>
+                            <a href="https://shh.pludo.org/auth/reset-password" style="display: inline-block; background-color: #dc2626; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-bottom: 20px;">Reset Password</a>
+                            <p style="color: #9ca3af; font-size: 12px; margin-top: 40px;">For security reasons, if you did not initiate this password change, please click the reset password button above immediately.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`,
             });
 
             if (error) {
