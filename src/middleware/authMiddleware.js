@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const JWTBlock = require('../models/jwtblacklist.js');
 const validator = require('validator');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'secret';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 const requireAuth = async (req, res, next) => {
     const token = req.cookies.jwt;

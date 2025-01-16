@@ -6,7 +6,7 @@ const crypto = require('crypto');
 const User = require('../models/user.js');
 const JWTBlock = require('../models/jwtblacklist.js');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'secret';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 const postRegister = async (req, res) => {
     try {
