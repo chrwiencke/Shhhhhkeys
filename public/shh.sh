@@ -56,35 +56,18 @@ SHH_USER=""
 case "$0" in
     sh|*/sh)
         TEMP_SCRIPT="/tmp/shh_install_$$"
-        cat > "$TEMP_SCRIPT" || exit 1
-        
-        # Fix line endings if dos2unix is available
-        if command -v dos2unix >/dev/null 2>&1; then
-            dos2unix "$TEMP_SCRIPT" >/dev/null 2>&1
-        fi
+        tr -d '\r' > "$TEMP_SCRIPT" || exit 1
         
         echo "Installing Shhhhhkeys utility to /usr/local/bin/shh..."
         if [ "`id -u`" = "0" ]; then
-            # Running as root/sudo
-            cp "$TEMP_SCRIPT" "/usr/local/bin/shh" && \
-            chmod 755 "/usr/local/bin/shh"
-            INSTALL_STATUS=$?
+            install -m 755 "$TEMP_SCRIPT" "/usr/local/bin/shh"
         else
-            # Not running as root, try with sudo
-            sudo cp "$TEMP_SCRIPT" "/usr/local/bin/shh" && \
-            sudo chmod 755 "/usr/local/bin/shh"
-            INSTALL_STATUS=$?
+            sudo install -m 755 "$TEMP_SCRIPT" "/usr/local/bin/shh"
         fi
-
-        if [ $INSTALL_STATUS -eq 0 ]; then
-            echo "Installation successful! You can now use 'shh' command."
-            rm -f "$TEMP_SCRIPT"
-            exit 0
-        else
-            echo "Error: Installation failed. Please run with sudo."
-            rm -f "$TEMP_SCRIPT"
-            exit 1
-        fi
+        
+        rm -f "$TEMP_SCRIPT"
+        echo "Installation successful! You can now use 'shh' command."
+        exit 0
         ;;
 esac
 
@@ -202,39 +185,42 @@ fi
 fetch_key() {
     KEY="$1"
     echo "Fetching key from: https://shh.pludo.org/$KEY" >&2
-    RESPONSE=`curl -s -w "\n%{http_code}" "https://shh.pludo.org/$KEY"`
-    HTTP_CODE=`echo "$RESPONSE" | tail -n1`
-    KEY_CONTENT=`echo "$RESPONSE" | sed '$d'`
-    
-    if [ "$HTTP_CODE" != "200" ]; then
-        echo "Error: Failed to fetch key - HTTP code $HTTP_CODE" >&2
+    curl -s "https://shh.pludo.org/$KEY" > "/tmp/key_$$"
+    if [ $? -ne 0 ]; then
+        echo "Error: Failed to fetch key" >&2
+        rm -f "/tmp/key_$$"
         return 1
     fi
     
-    if [ -z "$KEY_CONTENT" ]; then
+    if [ ! -s "/tmp/key_$$" ]; then
         echo "Error: Empty key content received" >&2
+        rm -f "/tmp/key_$$"
         return 1
     fi
     
-    if ! echo "$KEY_CONTENT" | grep -q "^ssh-"; then
+    if ! grep -q "^ssh-" "/tmp/key_$$"; then
         echo "Error: Invalid SSH key format" >&2
+        rm -f "/tmp/key_$$"
         return 1
     fi
     
-    printf "%s\n" "$KEY_CONTENT"
+    cat "/tmp/key_$$"
+    rm -f "/tmp/key_$$"
     return 0
 }
 
 # Key processing section
 ANY_KEYS_ADDED=0
 for key in $KEYS; do
-    KEY_CONTENT=$(fetch_key "$key")
-    RC=$?
-    if [ $RC -eq 0 ] && [ -n "$KEY_CONTENT" ]; then
+    KEY_FILE="/tmp/key_result_$$"
+    fetch_key "$key" > "$KEY_FILE"
+    if [ $? -eq 0 ] && [ -s "$KEY_FILE" ]; then
         echo "Adding key: $key" >&2
-        printf '%s\n\n' "$KEY_CONTENT" >> "$AUTHORIZED_KEYS"
+        cat "$KEY_FILE" >> "$AUTHORIZED_KEYS"
+        echo "" >> "$AUTHORIZED_KEYS"
         ANY_KEYS_ADDED=1
     fi
+    rm -f "$KEY_FILE"
 done
 
 # Verify keys were added
