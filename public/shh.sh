@@ -53,46 +53,35 @@ KEYS=""
 SHH_USER=""
 
 # Self-installation when downloaded via wget
-if [ "$0" = "sh" ] || echo "$0" | grep -q "wget"; then
-    TEMP_SCRIPT="/tmp/shh_install_$$"
-    # Ensure we get the complete script
-    cat > "$TEMP_SCRIPT" || exit 1
-    
-    # Validate script content
-    if ! sh -n "$TEMP_SCRIPT"; then
-        echo "Error: Invalid script content"
-        rm -f "$TEMP_SCRIPT"
-        exit 1
-    fi
-    
-    echo "Installing Shhhhhkeys utility to /usr/local/bin/shh..."
-    if [ "$(id -u)" = "0" ]; then
-        # Running as root/sudo
-        if ! install -m 755 "$TEMP_SCRIPT" "/usr/local/bin/shh"; then
-            echo "Error: Installation failed"
+case "$0" in
+    sh|*/sh)
+        TEMP_SCRIPT="/tmp/shh_install_$$"
+        cat > "$TEMP_SCRIPT" || exit 1
+        
+        echo "Installing Shhhhhkeys utility to /usr/local/bin/shh..."
+        if [ "`id -u`" = "0" ]; then
+            # Running as root/sudo
+            cp "$TEMP_SCRIPT" "/usr/local/bin/shh" && \
+            chmod 755 "/usr/local/bin/shh"
+            INSTALL_STATUS=$?
+        else
+            # Not running as root, try with sudo
+            sudo cp "$TEMP_SCRIPT" "/usr/local/bin/shh" && \
+            sudo chmod 755 "/usr/local/bin/shh"
+            INSTALL_STATUS=$?
+        fi
+
+        if [ $INSTALL_STATUS -eq 0 ]; then
+            echo "Installation successful! You can now use 'shh' command."
+            rm -f "$TEMP_SCRIPT"
+            exit 0
+        else
+            echo "Error: Installation failed. Please run with sudo."
             rm -f "$TEMP_SCRIPT"
             exit 1
         fi
-    else
-        # Not running as root, try with sudo
-        if ! sudo install -m 755 "$TEMP_SCRIPT" "/usr/local/bin/shh"; then
-            echo "Error: Installation failed. Please run with sudo"
-            rm -f "$TEMP_SCRIPT"
-            exit 1
-        fi
-    fi
-    
-    # Verify installed script
-    if ! sh -n "/usr/local/bin/shh"; then
-        echo "Error: Installation verification failed"
-        rm -f "$TEMP_SCRIPT"
-        exit 1
-    fi
-    
-    rm -f "$TEMP_SCRIPT"
-    echo "Installation successful! You can now use 'shh' command."
-    exit 0
-fi
+        ;;
+esac
 
 if [ "$1" = "-s" ]; then
     if [ "$#" -lt 4 ]; then
