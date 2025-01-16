@@ -196,23 +196,23 @@ fi
 # Process key fetch results
 fetch_key() {
     KEY="$1"
-    echo "Fetching key from: https://shh.pludo.org/$KEY"
+    echo "Fetching key from: https://shh.pludo.org/$KEY" >&2
     RESPONSE=`curl -s -w "\n%{http_code}" "https://shh.pludo.org/$KEY"`
     HTTP_CODE=`echo "$RESPONSE" | tail -n1`
     KEY_CONTENT=`echo "$RESPONSE" | sed '$d'`
     
     if [ "$HTTP_CODE" != "200" ]; then
-        echo "Error: Failed to fetch key - HTTP code $HTTP_CODE"
+        echo "Error: Failed to fetch key - HTTP code $HTTP_CODE" >&2
         return 1
     fi
     
     if [ -z "$KEY_CONTENT" ]; then
-        echo "Error: Empty key content received"
+        echo "Error: Empty key content received" >&2
         return 1
     fi
     
     if ! echo "$KEY_CONTENT" | grep -q "^ssh-"; then
-        echo "Error: Invalid SSH key format"
+        echo "Error: Invalid SSH key format" >&2
         return 1
     fi
     
@@ -226,14 +226,14 @@ for key in $KEYS; do
     KEY_CONTENT=`fetch_key "$key"`
     RC=$?
     if [ $RC -eq 0 ] && [ -n "$KEY_CONTENT" ]; then
-        echo "Adding key: $key"
+        echo "Adding key: $key" >&2
         printf "%s\n\n" "$KEY_CONTENT" >> "$AUTHORIZED_KEYS"
         ANY_KEYS_ADDED=1
     fi
 done
 
 # Verify keys were added
-if [ $ANY_KEYS_ADDED -eq 0 ]; then
+if [ $ANY_KEYS_ADDED -eq 0; then
     echo "Warning: No SSH keys were added to $AUTHORIZED_KEYS"
     exit 1
 fi
