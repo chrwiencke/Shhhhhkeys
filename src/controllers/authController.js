@@ -183,7 +183,7 @@ const postResetPassword = async (req, res) => {
         
         try {
             const { data, error } = await resend.emails.send({
-                from: 'Shhh Pludo <verify@huzzand.buzz>',
+                from: 'Shhh Pludo <reset-password@huzzand.buzz>',
                 to: [email],
                 subject: 'Reset Your Password - Shhhhkeys',
                 html: `
@@ -259,7 +259,7 @@ const getResetPassword = async (req, res) => {
         
         try {
             const { data, error } = await resend.emails.send({
-                from: 'Shhh Pludo <verify@huzzand.buzz>',
+                from: 'Shhh Pludo <reset-password@huzzand.buzz>',
                 to: [userEmail],
                 subject: 'Your New Temporary Password - Shhhhkeys',
                 html: `
