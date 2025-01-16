@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Shhhhhkeys - SSH Key Management Utility
 # 
