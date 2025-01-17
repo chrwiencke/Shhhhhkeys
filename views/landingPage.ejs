@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shhhhhkeys - Manage Your SSH Keys</title>
-    <link rel="stylesheet" href="tailwind.min.css">
+    <link rel="stylesheet" href="/stylesheets/style.css">
 </head>
 <body class="bg-gray-50">
     <!-- Navigation -->
@@ -199,6 +199,14 @@ shh -s alice johndoe key1 key2</pre>
         </div>
     </footer>
 </body>
+<script>
+    document.getElementById("year").innerHTML = new Date().getFullYear();
+    
+    // Request persistent storage using modern API
+    if (navigator.storage && navigator.storage.persist) {
+        navigator.storage.persist().then(isPersisted => {
+            console.log(`Persistent storage granted: ${isPersisted}`);
+        });
+    }
+</script>
 </html>
-
-<script>document.getElementById("year").innerHTML = new Date().getFullYear();</script>
