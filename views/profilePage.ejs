@@ -1,39 +1,60 @@
 <%- include('partials/header'); -%>
-<%- include('partials/navbardashboard'); -%>
+    <%- include('partials/navbardashboard'); -%>
 
-<div class="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-        <div class="px-8 py-6">
-            <div class="text-center mb-8">
-                <div class="h-24 w-24 rounded-full bg-indigo-100 mx-auto flex items-center justify-center">
-                    <span class="text-3xl font-bold text-indigo-600"><%= user.username.charAt(0).toUpperCase() %></span>
-                </div>
-                <h2 class="mt-4 text-2xl font-bold text-gray-900"><%= user.username %></h2>
-            </div>
+        <div class="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+            <div class="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="px-8 py-6">
+                    <div class="text-center mb-8">
+                        <div class="h-24 w-24 rounded-full bg-indigo-100 mx-auto flex items-center justify-center">
+                            <span class="text-3xl font-bold text-indigo-600">
+                                <%= user.username.charAt(0).toUpperCase() %>
+                            </span>
+                        </div>
+                        <h2 class="mt-4 text-2xl font-bold text-gray-900">
+                            <%= user.username %>
+                        </h2>
+                    </div>
 
-            <div class="space-y-4">
-                <div class="border-t border-gray-200 pt-4">
-                    <p class="text-sm font-medium text-gray-500">User ID</p>
-                    <p class="mt-1 text-md text-gray-900"><%= user.userId %></p>
-                </div>
+                    <div class="space-y-4">
+                        <div class="border-t border-gray-200 pt-4">
+                            <p class="text-sm font-medium text-gray-500">User ID</p>
+                            <p class="mt-1 text-md text-gray-900">
+                                <%= user.userId %>
+                            </p>
+                        </div>
 
-                <div class="border-t border-gray-200 pt-4">
-                    <p class="text-sm font-medium text-gray-500">Email</p>
-                    <p class="mt-1 text-md text-gray-900"><%= user.email %></p>
-                </div>
+                        <div class="border-t border-gray-200 pt-4">
+                            <p class="text-sm font-medium text-gray-500">Email</p>
+                            <p class="mt-1 text-md text-gray-900">
+                                <%= user.email %>
+                            </p>
+                        </div>
 
-                <div class="border-t border-gray-200 pt-4">
-                    <a href="/dashboard/profile/change-password" 
-                       class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Change Password
-                        <svg class="ml-2 -mr-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                        </svg>
-                    </a>
+                        <div class="border-t border-gray-200 pt-4">
+                            <div class="flex justify-between space-x-1">
+                                <a href="/dashboard/profile/change-password"
+                                    class="flex-1 inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    Change Password
+                                    <svg class="ml-2 -mr-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                </a>
+                                <a href="/dashboard/profile/change-email"
+                                    class="flex-1 inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    Change Email
+                                    <svg class="ml-2 -mr-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
-<%- include('partials/footer'); -%>
+        <%- include('partials/footer'); -%>

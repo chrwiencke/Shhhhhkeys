@@ -10,6 +10,9 @@ const profilePage = (req, res) => {
 const changePassword = (req, res) => {
     res.render('changePassword', { user: req.user });
 };
+const getChangeEmail = (req, res) => {
+    res.render('changeEmail', { user: req.user });
+};
 
 const mainDashboard = async (req, res) => {
     const username = req.user.username;
@@ -281,4 +284,5 @@ module.exports = {
     addSocialShhKeyDashboard,
     createSocialSshKeyDashboard,
     deleteSocialSshKeyDashboard,
+    getChangeEmail,
 };

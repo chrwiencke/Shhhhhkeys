@@ -30,6 +30,17 @@ const userSchema = new mongoose.Schema({
         required: false,
         default: undefined
     },
+    verificationTokenChangeEmail: {
+        type: String,
+        required: false,
+        default: undefined
+    },
+    newEmail: {
+        type: String,
+        required: false,
+        default: undefined
+    },
+
 });
 
 module.exports = mongoose.model('User', userSchema);

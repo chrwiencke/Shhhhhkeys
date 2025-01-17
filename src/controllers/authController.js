@@ -405,7 +405,20 @@ const postChangePassword = async (req, res) => {
         }
 
         await user.save();
-        res.redirect('/dashboard/');
+        
+        const currentToken = req.cookies.jwt;
+        if (currentToken) {
+            const tokendb = new JWTBlock({ jwt: currentToken });
+            await tokendb.save();
+
+            res.clearCookie('jwt', {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict'
+            });
+        }
+        
+        res.redirect('/auth/login');
     } catch (error) {
         console.error('Error changing password:', error);
         res.status(500).json({ message: 'Error changing password' });
@@ -464,6 +477,126 @@ const logout = async (req, res) => {
     }
 };
 
+const postChangeEmail = async (req, res) => {
+    try {
+        const { currentEmail, newEmail } = req.body;
+        const email = req.user.email;
+
+        if (!newEmail) {
+            return res.status(400).json({ message: 'All fields are required' });
+        }
+
+        if (!currentEmail) {
+            return res.status(400).json({ message: 'All fields are required' });
+        }
+
+        const user = await User.findOne({ email: currentEmail });
+
+        if (!user.email === currentEmail) {
+            return res.status(400).json({ message: 'Not authorized' });
+        }
+
+        if (!user.email === email) {
+            return res.status(400).json({ message: 'User does not exist' });
+        }
+        
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+        const verificationUrl = `https://shh.pludo.org/auth/verify-change-email/${verificationToken}`;
+
+        const resend = new Resend(process.env.RESEND_KEY)
+        
+        try {
+            const { data, error } = await resend.emails.send({
+                from: 'Shhh Pludo <verify@huzzand.buzz>',
+                to: [email],
+                subject: 'Confirm Email Change - Shhhhkeys',
+                html: `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f4f5; font-family: Arial, sans-serif;">
+    <table role="presentation" style="width: 100%; border-collapse: collapse;">
+        <tr>
+            <td align="center" style="padding: 40px 0;">
+                <table role="presentation" style="width: 90%; max-width: 600px; border-collapse: collapse; background-color: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+                    <tr>
+                        <td style="padding: 40px 30px; text-align: center;">
+                            <h1 style="color: #1f2937; margin-bottom: 20px; font-size: 24px;">Confirm Email Change</h1>
+                            <p style="color: #4b5563; margin-bottom: 30px; font-size: 16px;">We received a request to change your email address to: <strong style="color: #4f46e5;">${newEmail}</strong></p>
+                            <a href="${verificationUrl}" style="display: inline-block; background-color: #4f46e5; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-bottom: 20px;">Confirm Email Change</a>
+                            <p style="color: #6b7280; font-size: 14px; margin-top: 20px;">If the button doesn't work, copy and paste this link into your browser:</p>
+                            <p style="color: #4f46e5; font-size: 14px; word-break: break-all;">${verificationUrl}</p>
+                            <p style="color: #9ca3af; font-size: 12px; margin-top: 40px;">If you didn't request this email change, please ignore this email or contact support if you have concerns.</p>
+                            <p style="color: #dc2626; font-size: 14px; margin-top: 20px;">Note: You will be logged out after changing your email and will need to log in again.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`,
+            });
+
+            if (error) {
+                console.error('Email sending error:', error);
+                return res.status(400).json({ message: 'Error sending verification email' });
+            }
+        } catch (emailError) {
+            console.error('Email sending error:', emailError);
+            return res.status(400).json({ message: 'Error sending verification email' });
+        }
+
+        user.newEmail = newEmail
+        user.verificationTokenChangeEmail = verificationToken;
+        await user.save();
+
+        res.redirect('/auth/email-sent');
+    } catch (error) {
+        console.error('Error changing email:', error);
+        res.status(500).json({ message: 'Error changing email' });
+    }
+};
+
+const getVerifyChangeEmail = async (req, res) => {
+    try {
+        const verifyToken = req.params.token;
+
+        const user = await User.findOne({ verificationTokenChangeEmail: verifyToken });
+
+        if (!user) {
+            return res.status(400).json({message: 'Invalid verification token'});
+        }
+
+        const newEmail = user.newEmail
+        user.email = newEmail;
+        user.newEmail = undefined;
+        user.verificationTokenChangeEmail = undefined;
+
+        await user.save();
+
+        const currentToken = req.cookies.jwt;
+        if (currentToken) {
+            const tokendb = new JWTBlock({ jwt: currentToken });
+            await tokendb.save();
+
+            res.clearCookie('jwt', {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict'
+            });
+        }
+        
+        res.redirect('/auth/login');
+    } catch (error) {
+        console.error('Error verifying email:', error);
+        res.status(500).json({ message: 'Error verifying email' });
+    }
+};
+
 const loginPage = (req, res) => {
     res.render('loginPage');
 };
@@ -498,4 +631,6 @@ module.exports = {
     getResetPassword,
     emailSentPage,
     postChangePassword,
+    getVerifyChangeEmail,
+    postChangeEmail,
 };

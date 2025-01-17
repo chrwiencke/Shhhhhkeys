@@ -7,6 +7,7 @@ const { generalLimiter } = require('../middleware/generalRatelimter.js');
 // /dashboard
 router.get('/profile', generalLimiter, requireAuth, dashboardController.profilePage);
 router.get('/profile/change-password', generalLimiter, requireAuth, dashboardController.changePassword);
+router.get('/profile/change-email', generalLimiter, requireAuth, dashboardController.getChangeEmail);
 router.get('/add-ssh-key', generalLimiter, requireAuth, dashboardController.addShhKeyDashboard);
 router.get('/add-social-key', generalLimiter, requireAuth, dashboardController.addSocialShhKeyDashboard);
 
@@ -18,5 +19,6 @@ router.post('/create-social-key', generalLimiter, requireAuth, dashboardControll
 router.post('/delete-ssh-key/:id', generalLimiter, requireAuth, dashboardController.deleteSshKeyDashboard);
 router.post('/delete-social-key/:id', generalLimiter, requireAuth, dashboardController.deleteSocialSshKeyDashboard);
 router.post('/enable-disable-ssh-key/:id', generalLimiter, requireAuth, dashboardController.enabledisableSshKeyDashboard);
+
 
 exports.router = router;

@@ -19,7 +19,9 @@ router.post('/change-password', generalLimiter, requireAuth, authController.post
 router.post('/reset-password', generalLimiter, loginLimiter, authController.postResetPassword);
 
 router.get('/verify-email/:token', generalLimiter, authController.getVerify);
+router.get('/verify-change-email/:token', generalLimiter, requireAuth, authController.getVerifyChangeEmail);
 router.get('/verify-password/:token', generalLimiter, authController.getResetPassword);
+router.post('/change-email', generalLimiter, requireAuth, authController.postChangeEmail);
 
 router.get('/logout', generalLimiter, authController.logout);
 router.get('/verified', generalLimiter, authController.verifiedPage);
