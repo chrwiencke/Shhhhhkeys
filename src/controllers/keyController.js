@@ -6,10 +6,11 @@ const getSshKey = async (req, res) => {
         const user = req.params.user;
 
         if (!title) {
-            return res.status(400).json({ message: 'No title found' });
+            return res.status(404).json({ message: 'No title found' });
         }
+
         if (!user) {
-            return res.status(400).json({ message: 'No user found' });
+            return res.status(404).json({ message: 'No user found' });
         }
 
         const data = await ShhKey.findOne({ username: user, title });
@@ -35,7 +36,7 @@ const getSshKeys = async (req, res) => {
         const user = req.params.user;
 
         if (!user) {
-            return res.status(400).json({ message: 'No user found' });
+            return res.status(404).json({ message: 'No user found' });
         }
         
         const data = await ShhKey.find({ username: user });
