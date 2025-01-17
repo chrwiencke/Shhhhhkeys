@@ -19,10 +19,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+app.set('trust proxy', 1);
+
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    proxy: true,
     cookie: {
         secure: process.env.NODE_ENV === 'production',
         httpOnly: true,
@@ -38,10 +41,13 @@ app.use(lusca({
             name: 'XSRF-TOKEN',
             options: {
                 secure: process.env.NODE_ENV === 'production',
-                sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax'
+                sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+                path: '/'
             }
         },
-        header: 'X-XSRF-TOKEN'
+        header: 'X-XSRF-TOKEN',
+        key: '_csrf',
+        secret: process.env.SESSION_SECRET
     },
     xframe: 'SAMEORIGIN',
     xssProtection: true
