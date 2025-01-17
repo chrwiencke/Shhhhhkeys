@@ -482,12 +482,21 @@ const postChangeEmail = async (req, res) => {
         const { currentEmail, newEmail } = req.body;
         const email = req.user.email;
 
-        if (!newEmail) {
+        if (!newEmail || !currentEmail) {
             return res.status(400).json({ message: 'All fields are required' });
         }
 
-        if (!currentEmail) {
-            return res.status(400).json({ message: 'All fields are required' });
+        if (!validator.isEmail(newEmail)) {
+            return res.status(400).json({ message: 'New email format is incorrect' });
+        }
+
+        if (currentEmail === newEmail) {
+            return res.status(400).json({ message: 'New email must be different from current email' });
+        }
+
+        const existingEmail = await User.findOne({ email: newEmail });
+        if (existingEmail) {
+            return res.status(400).json({ message: 'Email already exists' });
         }
 
         const user = await User.findOne({ email: currentEmail });
