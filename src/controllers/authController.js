@@ -507,7 +507,7 @@ const postChangeEmail = async (req, res) => {
             return res.render("error.ejs", { errorMessage: 'Email already exists' });
         }
 
-        const user = await User.findOne({ email: currentEmail });
+        const user = await User.findOne({ email: { $eq: currentEmail } });
 
         if (!user.email === currentEmail) {
             return res.render("error.ejs", { errorMessage: 'Not authorized' });
