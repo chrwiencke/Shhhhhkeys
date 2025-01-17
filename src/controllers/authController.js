@@ -502,7 +502,7 @@ const postChangeEmail = async (req, res) => {
             return res.render("error.ejs", { errorMessage: 'New email must be different from current email' });
         }
 
-        const existingEmail = await User.findOne({ email: newEmail });
+        const existingEmail = await User.findOne({ email: { $eq: newEmail } });
         if (existingEmail) {
             return res.render("error.ejs", { errorMessage: 'Email already exists' });
         }
