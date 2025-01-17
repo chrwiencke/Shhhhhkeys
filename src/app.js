@@ -26,6 +26,7 @@ app.use(session({
     cookie: {
         secure: process.env.NODE_ENV === 'production',
         httpOnly: true,
+        sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
         maxAge: 1000 * 60 * 60 * 24
     }
 }));
@@ -33,7 +34,13 @@ app.use(session({
 app.use(lusca({
     csrf: {
         angular: false,
-        cookie: 'XSRF-TOKEN',
+        cookie: {
+            name: 'XSRF-TOKEN',
+            options: {
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax'
+            }
+        },
         header: 'X-XSRF-TOKEN'
     },
     xframe: 'SAMEORIGIN',
@@ -52,8 +59,8 @@ app.use('/', key);
 
 mongoose.connect(process.env.MONGODB_URI)
     .then(() => {
+        console.log("MongoDB Connected");
         app.listen(process.env.PORT, () => {
-            console.log("MongoDB Connected");
             console.log("Listening on PORT: " + process.env.PORT);
         });
     })
