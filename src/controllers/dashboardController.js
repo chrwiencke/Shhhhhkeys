@@ -112,7 +112,7 @@ const createSshKeyDashboard = async (req, res) => {
         const sshkey = new ShhKey({
             username,
             title: sanitizedTitle,
-            key: key.trim(),
+            key: key,
             createdAt
         });
         

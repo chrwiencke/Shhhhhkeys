@@ -76,6 +76,7 @@
                                         <div class="h-5 w-px bg-gray-300"></div>
                                         <form action="/dashboard/enable-disable-ssh-key/<%= sshKey._id %>"
                                             method="POST" class="inline-flex">
+                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                             <button type="submit" class="text-red-500 hover:text-red-700"
                                                 onclick="return confirm('Are you sure you want to disable/enable this SSH key?')">
                                                 <span class="sr-only">Disable/Enable Key</span>
@@ -103,6 +104,7 @@
                                         </form>
                                         <form action="/dashboard/delete-ssh-key/<%= sshKey._id %>" method="POST"
                                             class="inline-flex">
+                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                             <button type="submit" class="text-red-500 hover:text-red-700"
                                                 onclick="return confirm('Are you sure you want to delete this SSH key? Remember you cannot make a new ssh key with the same title')">
                                                 <span class="sr-only">Delete Key</span>
@@ -205,6 +207,7 @@
                                             </svg>
                                         </button>
                                         <form action="/dashboard/delete-social-key/<%= socialKey._id %>" method="POST" class="inline-flex">
+                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                             <button type="submit" class="text-red-500 hover:text-red-700"
                                                 onclick="return confirm('Are you sure you want to delete this social SSH key?')">
                                                 <span class="sr-only">Delete Key</span>
