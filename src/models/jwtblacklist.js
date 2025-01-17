@@ -4,6 +4,11 @@ const jwtblacklistSchema = new mongoose.Schema({
     jwt: {
         type: String,
         required: true
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now,
+        expires: 86400 // 24 hours in seconds (24 * 60 * 60)
     }
 });
 
