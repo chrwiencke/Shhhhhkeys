@@ -15,9 +15,9 @@
                     required
                     minlength="3"
                     maxlength="30"
-                    pattern="[a-zA-Z0-9_]+"
+                    pattern="^[a-zA-Z0-9_]+$"
                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border"
-                    title="Username can only contain letters, numbers and underscores">
+                    title="Username must be 3-30 characters, containing only letters, numbers and underscores">
                 <p class="mt-1 text-sm text-gray-500">Must be 3-30 characters, letters, numbers, and underscores only</p>
             </div>
 
@@ -46,7 +46,7 @@
                     maxlength="100"
                     pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':&quot;\\|,.<>/?])[A-Za-z\d!@#$%^&*()_+\-=[\]{};':&quot;\\|,.<>/?]{8,}$"
                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 border"
-                    title="Password must meet requirements below">
+                    title="Password must contain at least one uppercase letter, one lowercase letter, one number and one special character">
                 <div class="mt-2 text-sm text-gray-500">
                     Password requirements:
                     <ul class="list-disc pl-5 mt-1 space-y-1">

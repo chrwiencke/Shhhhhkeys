@@ -45,70 +45,58 @@ const createSshKeyDashboard = async (req, res) => {
         const username = req.user.username;
 
         if (!title) {
-            return res.status(400).json({ message: 'Title is required' });
+            return res.render("error.ejs", { errorMessage: 'Title is required' });
         }
 
         if (title === "keys") {
-            return res.status(400).json({ message: 'Cannot be named this' });
+            return res.render("error.ejs", { errorMessage: 'Cannot be named this' });
         }
 
         if (!validator.isLength(title, { min: 1, max: 100 })) {
-            return res.status(400).json({ 
-                message: 'Title must be between 1 and 100 characters' 
-            });
+            return res.render("error.ejs", { errorMessage: 'Title must be between 1 and 100 characters' });
         }
 
         const sanitizedTitle = validator.escape(title);
 
         if (!sanitizedTitle.match(/^[a-zA-Z0-9\s\-_]+$/)) {
-            return res.status(400).json({ 
-                message: 'Title can only contain letters, numbers, spaces, hyphens and underscores' 
-            });
+            return res.render("error.ejs", { errorMessage: 'Title can only contain letters, numbers, spaces, hyphens and underscores' });
         }
 
         const titleInBlacklist = await ShhKeyBlacklist.findOne({ username, title: sanitizedTitle });
 
         if (titleInBlacklist) {
-            return res.status(401).json({ message: 'Title has been created by the same user before' });
+            return res.render("error.ejs", { errorMessage: 'Title has been created by the same user before' });
         }
 
         if (!key) {
-            return res.status(400).json({ message: 'SSH key is required' });
+            return res.render("error.ejs", { errorMessage: 'SSH key is required' });
         }
 
         const sshKeyRegex = /^(ssh-rsa|ssh-ed25519|ecdsa-sha2-nistp256|ecdsa-sha2-nistp384|ecdsa-sha2-nistp521)\s+[A-Za-z0-9+/]+[=]{0,3}(\s+.+)?$/;
         
         if (!sshKeyRegex.test(key.trim())) {
-            return res.status(400).json({ 
-                message: 'Invalid SSH key format. Supported types: RSA, ED25519, ECDSA' 
-            });
+            return res.render("error.ejs", { errorMessage: 'Invalid SSH key format. Supported types: RSA, ED25519, ECDSA' });
         }
 
         const keyParts = key.split(' ');
         if (keyParts[1] && keyParts[1].length < 44) {
-            return res.status(400).json({ 
-                message: 'SSH key is too short. Minimum 256 bits required' 
-            });
+            return res.render("error.ejs", { errorMessage: 'SSH key is too short. Minimum 256 bits required' });
         }
 
         if (key.length > 16384) {
-            return res.status(400).json({ 
-                message: 'SSH key is too long. Maximum size is 16KB' 
-            });
+            return res.render("error.ejs", { errorMessage: 'SSH key is too long. Maximum size is 16KB' });
         }
 
         const titleExists = await ShhKey.findOne({ username, title: sanitizedTitle });
         if (titleExists) {
-            return res.status(400).json({ message: 'Title already exists' });
+            return res.render("error.ejs", { errorMessage: 'Title already exists' });
         }
 
         const userKeyCount = await ShhKey.countDocuments({ username });
         const MAX_KEYS_PER_USER = 1088;
         
         if (userKeyCount >= MAX_KEYS_PER_USER) {
-            return res.status(400).json({ 
-                message: `Maximum number of SSH keys (${MAX_KEYS_PER_USER}) reached` 
-            });
+            return res.render("error.ejs", { errorMessage: `Maximum number of SSH keys (${MAX_KEYS_PER_USER}) reached` });
         }
 
         const createdAt = new Date();
@@ -134,17 +122,17 @@ const deleteSshKeyDashboard = async (req, res) => {
         const id = req.params['id'];
 
         if (!validator.isMongoId(id)) {
-            return res.status(400).json({ message: 'Invalid ID format' });
+            return res.render("error.ejs", { errorMessage: 'Invalid ID format' });
         }
 
         const idExists = await ShhKey.findOne({ _id: id });
 
         if (!idExists) {
-            return res.status(400).json({ message: 'ID does not exist' });
+            return res.render("error.ejs", { errorMessage: 'ID does not exist' });
         }
 
         if (idExists.username !== username) {
-            return res.status(403).json({ message: 'Not authorized' });
+            return res.render("error.ejs", { errorMessage: 'Not authorized' });
         }
         
         const title = idExists.title
@@ -170,17 +158,17 @@ const enabledisableSshKeyDashboard = async (req, res) => {
         const id = req.params['id'];
 
         if (!validator.isMongoId(id)) {
-            return res.status(400).json({ message: 'Invalid ID format' });
+            return res.render("error.ejs", { errorMessage: 'Invalid ID format' });
         }
 
         const idExists = await ShhKey.findOne({ _id: id });
 
         if (!idExists) {
-            return res.status(400).json({ message: 'ID does not exist' });
+            return res.render("error.ejs", { errorMessage: 'ID does not exist' });
         }
 
         if (idExists.username !== username) {
-            return res.status(403).json({ message: 'Not authorized' });
+            return res.render("error.ejs", { errorMessage: 'Not authorized' });
         }
 
         await ShhKey.findByIdAndUpdate(id, { 
@@ -200,7 +188,7 @@ const createSocialSshKeyDashboard = async (req, res) => {
         const username = req.user.username;
 
         if (!link) {
-            return res.status(400).json({ message: 'Link is required' });
+            return res.render("error.ejs", { errorMessage: 'Link is required' });
         }
 
         link = link.replace(/\/+$/, '');
@@ -209,25 +197,21 @@ const createSocialSshKeyDashboard = async (req, res) => {
         const match = link.match(linkRegex);
 
         if (!match) {
-            return res.status(400).json({ 
-                message: 'Invalid link format. Must be a valid shh.pludo.org URL with user/title pattern' 
-            });
+            return res.render("error.ejs", { errorMessage: 'Invalid link format. Must be a valid shh.pludo.org URL with user/title pattern' });
         }
 
         link = `https://${match[2]}${match[3]}`;
 
         const linkExists = await socialKeys.findOne({ username, link });
         if (linkExists) {
-            return res.status(400).json({ message: 'Link already exists' });
+            return res.render("error.ejs", { errorMessage: 'Link already exists' });
         }
 
         const userKeyCount = await socialKeys.countDocuments({ username });
         const MAX_LINKS_PER_USER = 1088;
         
         if (userKeyCount >= MAX_LINKS_PER_USER) {
-            return res.status(400).json({ 
-                message: `Maximum number of SSH keys (${MAX_LINKS_PER_USER}) reached` 
-            });
+            return res.render("error.ejs", { errorMessage: `Maximum number of SSH keys (${MAX_LINKS_PER_USER}) reached` });
         }
 
         const createdAt = new Date();
@@ -252,17 +236,17 @@ const deleteSocialSshKeyDashboard = async (req, res) => {
         const id = req.params['id'];
 
         if (!validator.isMongoId(id)) {
-            return res.status(400).json({ message: 'Invalid ID format' });
+            return res.render("error.ejs", { errorMessage: 'Invalid ID format' });
         }
 
         const idExists = await socialKeys.findOne({ _id: id });
 
         if (!idExists) {
-            return res.status(400).json({ message: 'ID does not exist' });
+            return res.render("error.ejs", { errorMessage: 'ID does not exist' });
         }
 
         if (idExists.username !== username) {
-            return res.status(403).json({ message: 'Not authorized' });
+            return res.render("error.ejs", { errorMessage: 'Not authorized' });
         }
 
         await socialKeys.deleteOne({ _id: id });

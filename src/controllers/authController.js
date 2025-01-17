@@ -13,40 +13,40 @@ const postRegister = async (req, res) => {
         const { username, email, password } = req.body;
         
         if (!username || !email || !password) {
-            return res.status(400).json({ message: 'All fields are required' });
+            return res.render("error.ejs", { errorMessage: 'All fields are required' });
         }
 
         if (!validator.isLength(username, { min: 3, max: 30 })) {
-            return res.status(400).json({ message: 'Username must be between 3 and 30 characters' });
+            return res.render("error.ejs", { errorMessage: 'Username must be between 3 and 30 characters' });
         }
         if (!username.match(/^[a-zA-Z0-9_]+$/)) {
-            return res.status(400).json({ message: 'Username can only contain letters, numbers and underscores' });
+            return res.render("error.ejs", { errorMessage: 'Username can only contain letters, numbers and underscores' });
         }
 
         if (!validator.isEmail(email)) {
-            return res.status(400).json({ message: 'Email format is incorrect' });
+            return res.render("error.ejs", { errorMessage: 'Email format is incorrect' });
         }
 
         if (!validator.isLength(password, { min: 8, max: 100 })) {
-            return res.status(400).json({ message: 'Password must be at least 8 characters long' });
+            return res.render("error.ejs", { errorMessage: 'Password must be at least 8 characters long' });
         }
         if (!password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?])[A-Za-z\d!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]{8,}$/)) {
-            return res.status(400).json({ 
-                message: 'Password must contain at least one uppercase letter, one lowercase letter, one number and one special character' 
+            return res.render("error.ejs", { 
+                errorMessage: 'Password must contain at least one uppercase letter, one lowercase letter, one number and one special character' 
             });
         }
         
         if (username === "auth" || username === "dashboard" || username === "about") {
-            return res.status(400).json({ message: 'Cannot be named this' });
+            return res.render("error.ejs", { errorMessage: 'Cannot be named this' });
         }
 
         const existingUser = await User.findOne({ $or: [{ username }, { email }] });
         if (existingUser) {
             if (existingUser.username === username) {
-                return res.status(400).json({ message: 'Username already exists' });
+                return res.render("error.ejs", { errorMessage: 'Username already exists' });
             }
             if (existingUser.email === email) {
-                return res.status(400).json({ message: 'Email already exists' });
+                return res.render("error.ejs", { errorMessage: 'Email already exists' });
             }
         }
 
@@ -102,11 +102,11 @@ const postRegister = async (req, res) => {
 
             if (error) {
                 console.error('Email sending error:', error);
-                return res.status(400).json({ message: 'Error sending verification email' });
+                return res.render("error.ejs", { errorMessage: 'Error sending verification email' });
             }
         } catch (emailError) {
             console.error('Email sending error:', emailError);
-            return res.status(400).json({ message: 'Error sending verification email' });
+            return res.render("error.ejs", { errorMessage: 'Error sending verification email' });
         }
 
         await user.save();
@@ -114,7 +114,7 @@ const postRegister = async (req, res) => {
         res.redirect('/auth/email-sent');
     } catch (error) {
         console.error('Registration error:', error);
-        res.status(500).json({ message: 'Error creating user' });
+        res.render("error.ejs", { errorMessage: 'Error creating user' });
     }
 };
 
@@ -123,25 +123,31 @@ const postLogin = async (req, res) => {
         const { email, password } = req.body;
         
         if (!email || !password) {
-            return res.status(400).json({ message: 'All fields are required' });
+            return res.render("error.ejs", { errorMessage: 'All fields are required' });
         }
         
         if (!validator.isEmail(email)) {
-            return res.status(400).json({ message: 'Email format is incorrect' });
+            return res.render("error.ejs", { errorMessage: 'Email format is incorrect' });
         }
         const user = await User.findOne({ email: { $eq: email } });
         
-        if (!user.isVerified) {
-            return res.status(400).json({ message: 'Email Not Verified' });
+        if (!user) {
+            return res.render("error.ejs", {
+                errorMessage: 'Invalid credentials'
+            });
         }
 
-        if (!user) {
-            return res.status(400).json({ message: 'Invalid credentials' });
+        if (!user.isVerified) {
+            return res.render("error.ejs", {
+                errorMessage: 'Email Not Verified'
+            });
         }
 
         const validPassword = await bcrypt.compare(password, user.password);
         if (!validPassword) {
-            return res.status(400).json({ message: 'Invalid credentials' });
+            return res.render("error.ejs", {
+                errorMessage: 'Invalid credentials'
+            });
         }
 
         const token = jwt.sign({ 
@@ -160,10 +166,12 @@ const postLogin = async (req, res) => {
             maxAge: 24 * 60 * 60 * 1000
         });
 
-        res.redirect('/dashboard/');
+        return res.redirect('/dashboard/');
     } catch (error) {
         console.error('Login error:', error);
-        res.status(500).json({ message: 'Error logging in' });
+        return res.render("error.ejs", {
+            errorMessage: 'An error occurred during login'
+        });
     }
 };
 
@@ -172,13 +180,13 @@ const postResetPassword = async (req, res) => {
         const { email } = req.body;
         
         if (!email) {
-            return res.status(400).json({ message: 'Email required' });
+            return res.render("error.ejs", { errorMessage: 'Email required' });
         }
 
         const user = await User.findOne({ email: { $eq: email } });
 
         if (!user) {
-            return res.status(400).json({ message: 'Email is not associated with a user' });
+            return res.render("error.ejs", { errorMessage: 'Email is not associated with a user' });
         }
         const verificationToken = crypto.randomBytes(32).toString('hex');
         const verificationUrl = `https://shh.pludo.org/auth/verify-password/${verificationToken}`;
@@ -221,11 +229,11 @@ const postResetPassword = async (req, res) => {
 
             if (error) {
                 console.error('Email sending error:', error);
-                return res.status(400).json({ message: 'Error sending verification email' });
+                return res.render("error.ejs", { errorMessage: 'Error sending verification email' });
             }
         } catch (emailError) {
             console.error('Email sending error:', emailError);
-            return res.status(400).json({ message: 'Error sending verification email' });
+            return res.render("error.ejs", { errorMessage: 'Error sending verification email' });
         }
 
         user.verificationTokenPassword = verificationToken;
@@ -234,7 +242,7 @@ const postResetPassword = async (req, res) => {
         res.redirect('/auth/email-sent');
     } catch (error) {
         console.error('Login error:', error);
-        res.status(500).json({ message: 'Error logging in' });
+        res.render("error.ejs", { errorMessage: 'Error logging in' });
     }
 };
 
@@ -246,7 +254,7 @@ const getResetPassword = async (req, res) => {
         const userToken = await User.findOne({ verificationTokenPassword: verifyToken });
 
         if (!userToken) {
-            return res.status(400).json({message: 'Invalid verification token'});
+            return res.render("error.ejs", { errorMessage: 'Invalid verification token' });
         }
 
         const userEmail = userToken.email
@@ -298,18 +306,18 @@ const getResetPassword = async (req, res) => {
 
             if (error) {
                 console.error('Email sending error:', error);
-                return res.status(400).json({ message: 'Error sending verification email' });
+                return res.render("error.ejs", { errorMessage: 'Error sending verification email' });
             }
         } catch (emailError) {
             console.error('Email sending error:', emailError);
-            return res.status(400).json({ message: 'Error sending verification email' });
+            return res.render("error.ejs", { errorMessage: 'Error sending verification email' });
         }
 
         await userToken.save();
         res.redirect('/auth/email-sent');
     } catch (error) {
         console.error('Error verifying email:', error);
-        res.status(500).json({ message: 'Error verifying email' });
+        res.render("error.ejs", { errorMessage: 'Error verifying email' });
     }
 };
 
@@ -319,39 +327,39 @@ const postChangePassword = async (req, res) => {
         const email = req.user.email;
 
         if (!newPassword) {
-            return res.status(400).json({ message: 'All fields are required' });
+            return res.render("error.ejs", { errorMessage: 'All fields are required' });
         }
 
         if (!currentPassword) {
-            return res.status(400).json({ message: 'All fields are required' });
+            return res.render("error.ejs", { errorMessage: 'All fields are required' });
         }
 
         if (!confirmPassword) {
-            return res.status(400).json({ message: 'All fields are required' });
+            return res.render("error.ejs", { errorMessage: 'All fields are required' });
         }
         if (newPassword !== confirmPassword) {
-            return res.status(400).json({ message: 'The password and confirmation password is not the same'})
+            return res.render("error.ejs", { errorMessage: 'The password and confirmation password is not the same' });
         }
 
         const user = await User.findOne({ email: email });
 
         const validPassword = await bcrypt.compare(currentPassword, user.password);
         if (!validPassword) {
-            return res.status(400).json({ message: 'Invalid credentials' });
+            return res.render("error.ejs", { errorMessage: 'Invalid credentials' });
         }
 
         if (!validator.isLength(newPassword, { min: 8, max: 100 })) {
-            return res.status(400).json({ message: 'Password must be at least 8 characters long' });
+            return res.render("error.ejs", { errorMessage: 'Password must be at least 8 characters long' });
         }
 
         if (!newPassword.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?])[A-Za-z\d!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]{8,}$/)) {
-            return res.status(400).json({ 
-                message: 'Password must contain at least one uppercase letter, one lowercase letter, one number and one special character' 
+            return res.render("error.ejs", { 
+                errorMessage: 'Password must contain at least one uppercase letter, one lowercase letter, one number and one special character' 
             });
         }
 
         if (!user.email === email) {
-            return res.status(400).json({ message: 'User does not exist' });
+            return res.render("error.ejs", { errorMessage: 'User does not exist' });
         }
 
 
@@ -397,11 +405,11 @@ const postChangePassword = async (req, res) => {
 
             if (error) {
                 console.error('Email sending error:', error);
-                return res.status(400).json({ message: 'Error sending verification email' });
+                return res.render("error.ejs", { errorMessage: 'Error sending verification email' });
             }
         } catch (emailError) {
             console.error('Email sending error:', emailError);
-            return res.status(400).json({ message: 'Error sending verification email' });
+            return res.render("error.ejs", { errorMessage: 'Error sending verification email' });
         }
 
         await user.save();
@@ -421,7 +429,7 @@ const postChangePassword = async (req, res) => {
         res.redirect('/auth/login');
     } catch (error) {
         console.error('Error changing password:', error);
-        res.status(500).json({ message: 'Error changing password' });
+        res.render("error.ejs", { errorMessage: 'Error changing password' });
     }
 };
 
@@ -432,7 +440,7 @@ const getVerify = async (req, res) => {
         const userToken = await User.findOne({ verificationTokenEmail: verifyToken });
 
         if (!userToken) {
-            return res.status(400).json({message: 'Invalid verification token'});
+            return res.render("error.ejs", { errorMessage: 'Invalid verification token' });
         }
 
         userToken.isVerified = true;
@@ -442,7 +450,7 @@ const getVerify = async (req, res) => {
         res.redirect('/auth/verified');
     } catch (error) {
         console.error('Error verifying email:', error);
-        res.status(500).json({ message: 'Error verifying email' });
+        res.render("error.ejs", { errorMessage: 'Error verifying email' });
     }
 };
 
@@ -451,7 +459,7 @@ const logout = async (req, res) => {
         const token = req.cookies.jwt;
         
         if (!token) {
-            return res.status(400).json({ message: 'No token found' });
+            return res.render("error.ejs", { errorMessage: 'No token found' });
         }
 
         try {
@@ -473,7 +481,7 @@ const logout = async (req, res) => {
         res.redirect('/');
     } catch (error) {
         console.error('Logout error:', error);
-        res.status(500).json({ message: 'Error logging out' });
+        res.render("error.ejs", { errorMessage: 'Error logging out' });
     }
 };
 
@@ -483,30 +491,30 @@ const postChangeEmail = async (req, res) => {
         const email = req.user.email;
 
         if (!newEmail || !currentEmail) {
-            return res.status(400).json({ message: 'All fields are required' });
+            return res.render("error.ejs", { errorMessage: 'All fields are required' });
         }
 
         if (!validator.isEmail(newEmail)) {
-            return res.status(400).json({ message: 'New email format is incorrect' });
+            return res.render("error.ejs", { errorMessage: 'New email format is incorrect' });
         }
 
         if (currentEmail === newEmail) {
-            return res.status(400).json({ message: 'New email must be different from current email' });
+            return res.render("error.ejs", { errorMessage: 'New email must be different from current email' });
         }
 
         const existingEmail = await User.findOne({ email: newEmail });
         if (existingEmail) {
-            return res.status(400).json({ message: 'Email already exists' });
+            return res.render("error.ejs", { errorMessage: 'Email already exists' });
         }
 
         const user = await User.findOne({ email: currentEmail });
 
         if (!user.email === currentEmail) {
-            return res.status(400).json({ message: 'Not authorized' });
+            return res.render("error.ejs", { errorMessage: 'Not authorized' });
         }
 
         if (!user.email === email) {
-            return res.status(400).json({ message: 'User does not exist' });
+            return res.render("error.ejs", { errorMessage: 'User does not exist' });
         }
         
         const verificationToken = crypto.randomBytes(32).toString('hex');
@@ -552,11 +560,11 @@ const postChangeEmail = async (req, res) => {
 
             if (error) {
                 console.error('Email sending error:', error);
-                return res.status(400).json({ message: 'Error sending verification email' });
+                return res.render("error.ejs", { errorMessage: 'Error sending verification email' });
             }
         } catch (emailError) {
             console.error('Email sending error:', emailError);
-            return res.status(400).json({ message: 'Error sending verification email' });
+            return res.render("error.ejs", { errorMessage: 'Error sending verification email' });
         }
 
         user.newEmail = newEmail
@@ -566,7 +574,7 @@ const postChangeEmail = async (req, res) => {
         res.redirect('/auth/email-sent');
     } catch (error) {
         console.error('Error changing email:', error);
-        res.status(500).json({ message: 'Error changing email' });
+        res.render("error.ejs", { errorMessage: 'Error changing email' });
     }
 };
 
@@ -577,7 +585,7 @@ const getVerifyChangeEmail = async (req, res) => {
         const user = await User.findOne({ verificationTokenChangeEmail: verifyToken });
 
         if (!user) {
-            return res.status(400).json({message: 'Invalid verification token'});
+            return res.render("error.ejs", { errorMessage: 'Invalid verification token' });
         }
 
         const newEmail = user.newEmail
@@ -602,7 +610,7 @@ const getVerifyChangeEmail = async (req, res) => {
         res.redirect('/auth/login');
     } catch (error) {
         console.error('Error verifying email:', error);
-        res.status(500).json({ message: 'Error verifying email' });
+        res.render("error.ejs", { errorMessage: 'Error verifying email' });
     }
 };
 
