@@ -30,6 +30,10 @@ const shhKeySchema = new mongoose.Schema({
         type: Boolean,
         default: true,
     },
+    editable: {
+        type: Boolean,
+        default: false,
+    },
     createdAt: {
         type: Date,
         default: Date.now

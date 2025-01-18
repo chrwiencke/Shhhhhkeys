@@ -19,7 +19,7 @@ const mainDashboard = async (req, res) => {
 
     const userKeys = await ShhKey.find(
         { username: username },
-        'title key shareable createdAt'
+        'title key shareable editable createdAt'
     );
     
     const userSocialKeys = await socialKeys.find(
@@ -42,6 +42,7 @@ const addSocialShhKeyDashboard = async (req, res) => {
 const createSshKeyDashboard = async (req, res) => {
     try {
         const { title, key } = req.body;
+        const editable = req.body.editable !== undefined;
         const username = req.user.username;
 
         if (!title) {
@@ -104,6 +105,7 @@ const createSshKeyDashboard = async (req, res) => {
             username,
             title: sanitizedTitle,
             key: key,
+            editable,
             createdAt
         });
         
@@ -113,6 +115,55 @@ const createSshKeyDashboard = async (req, res) => {
     } catch (error) {
         console.error('SSH Key creation error:', error);
         res.status(500).json({ message: 'Error creating SSH Key' });
+    }
+};
+
+const editSshKeyDashboard = async (req, res) => {
+    try {
+        const { title, key } = req.body;
+        const username = req.user.username;
+
+        if (!title) {
+            return res.render("error.ejs", { errorMessage: 'Something went wrong' });
+        }
+
+        if (!key) {
+            return res.render("error.ejs", { errorMessage: 'SSH key is required' });
+        }
+
+        const sshKeyRegex = /^(ssh-rsa|ssh-ed25519|ecdsa-sha2-nistp256|ecdsa-sha2-nistp384|ecdsa-sha2-nistp521)\s+[A-Za-z0-9+/]+[=]{0,3}(\s+.+)?$/;
+        
+        if (!sshKeyRegex.test(key.trim())) {
+            return res.render("error.ejs", { errorMessage: 'Invalid SSH key format. Supported types: RSA, ED25519, ECDSA' });
+        }
+
+        const keyParts = key.split(' ');
+        if (keyParts[1] && keyParts[1].length < 44) {
+            return res.render("error.ejs", { errorMessage: 'SSH key is too short. Minimum 256 bits required' });
+        }
+
+        if (key.length > 16384) {
+            return res.render("error.ejs", { errorMessage: 'SSH key is too long. Maximum size is 16KB' });
+        }
+
+        const sshKey = await ShhKey.findOne({ username, title });
+
+        if (!sshKey) {
+            return res.render("error.ejs", { errorMessage: 'SSH key not found' });
+        }
+
+        if (sshKey.editable) {
+            await ShhKey.findByIdAndUpdate(sshKey._id, { 
+                $set: { key }
+            });
+            return res.redirect('/dashboard/');
+        }
+
+        return res.render("error.ejs", { errorMessage: 'Key is not editable' });
+
+    } catch (error) {
+        console.error('SSH Key edit error:', error);
+        res.status(500).json({ message: 'Error editing SSH Key' });
     }
 };
 
@@ -134,15 +185,15 @@ const deleteSshKeyDashboard = async (req, res) => {
         if (idExists.username !== username) {
             return res.render("error.ejs", { errorMessage: 'Not authorized' });
         }
-        
-        const title = idExists.title
 
-        const sshkeyBlacklist = new ShhKeyBlacklist({
-            username,
-            title
-        });
-
-        await sshkeyBlacklist.save();
+        if (!idExists.editable) {
+            const title = idExists.title;
+            const sshkeyBlacklist = new ShhKeyBlacklist({
+                username,
+                title
+            });
+            await sshkeyBlacklist.save();
+        }
 
         await ShhKey.deleteOne({ _id: id });
         res.redirect('/dashboard/');
@@ -269,4 +320,5 @@ module.exports = {
     createSocialSshKeyDashboard,
     deleteSocialSshKeyDashboard,
     getChangeEmail,
+    editSshKeyDashboard,
 };
