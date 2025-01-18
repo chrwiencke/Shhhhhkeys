@@ -8,12 +8,12 @@ const requireAuth = async (req, res, next) => {
     const token = req.cookies.jwt;
 
     if (!token) {
-        return res.redirect('/auth/login/');
+        return res.redirect('/auth/login');
     }
 
     if (!validator.isJWT(token)) {
-        res.status(400).json({ message: 'JWT format is incorrect' });
         console.log('JWT format is incorrect')
+        return res.render("error.ejs", { errorMessage: 'Something went wrong, try to logout and login.' });
     }
     
     const tokenIsInBlacklist = await JWTBlock.findOne({ jwt: token });
