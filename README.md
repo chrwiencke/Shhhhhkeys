@@ -75,10 +75,6 @@ Visit [shh.pludo.org](https://shh.pludo.org) to:
 - Access your dashboard
 - Upload your keys
 
-## 📚 Documentation
-
-For more detailed information and advanced usage, visit our [documentation](https://shh.pludo.org/docs).
-
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
