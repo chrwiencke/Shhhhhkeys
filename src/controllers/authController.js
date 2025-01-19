@@ -615,23 +615,23 @@ const getVerifyChangeEmail = async (req, res) => {
 };
 
 const loginPage = (req, res) => {
-    res.render('loginPage');
+    res.render('auth/loginPage');
 };
 
 const registerPage = (req, res) => {
-    res.render('registerPage');
+    res.render('auth/registerPage');
 };
 
 const verifiedPage = (req, res) => {
-    res.render('verified');
+    res.render('misc/verified');
 };
 
 const emailSentPage = (req, res) => {
-    res.render('emailSent');
+    res.render('misc/emailSent');
 };
 
 const resetPasswordPage = async (req, res) => {
-    res.render('resetPassword');
+    res.render('auth/resetPassword');
 };
 
 

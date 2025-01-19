@@ -4,14 +4,14 @@ const ShhKeyBlacklist = require('../models/sshkeytitleblacklist.js');
 const validator = require('validator');
 
 const profilePage = (req, res) => {
-    res.render('profilePage', { user: req.user });
+    res.render('profile/profilePage', { user: req.user });
 };
 
 const changePassword = (req, res) => {
-    res.render('changePassword', { user: req.user });
+    res.render('profile/changePassword', { user: req.user });
 };
 const getChangeEmail = (req, res) => {
-    res.render('changeEmail', { user: req.user });
+    res.render('profile/changeEmail', { user: req.user });
 };
 
 const mainDashboard = async (req, res) => {
