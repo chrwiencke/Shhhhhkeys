@@ -28,19 +28,24 @@ const userSchema = new mongoose.Schema({
     verificationTokenPassword: {
         type: String,
         required: false,
-        default: undefined
+        default: undefined,
+        expires: 86400 // 24 hours in seconds
     },
     verificationTokenChangeEmail: {
         type: String,
         required: false,
-        default: undefined
+        default: undefined,
+        expires: 86400 // 24 hours in seconds
     },
     newEmail: {
         type: String,
         required: false,
         default: undefined
     },
-
 });
+
+// TTL indexes
+userSchema.index({ "verificationTokenPassword": 1 }, { expireAfterSeconds: 86400 });
+userSchema.index({ "verificationTokenChangeEmail": 1 }, { expireAfterSeconds: 86400 });
 
 module.exports = mongoose.model('User', userSchema);
