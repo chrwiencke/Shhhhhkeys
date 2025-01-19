@@ -59,8 +59,8 @@ const createSshKeyDashboard = async (req, res) => {
 
         const sanitizedTitle = validator.escape(title);
 
-        if (!sanitizedTitle.match(/^[a-zA-Z0-9\s\-_]+$/)) {
-            return res.render("error.ejs", { errorMessage: 'Title can only contain letters, numbers, spaces, hyphens and underscores' });
+        if (!sanitizedTitle.match(/^[a-zA-Z0-9\-_]+$/)) {
+            return res.render("error.ejs", { errorMessage: 'Title can only contain letters, numbers, hyphens and underscores (no spaces)' });
         }
 
         const titleInBlacklist = await ShhKeyBlacklist.findOne({ username, title: sanitizedTitle });
