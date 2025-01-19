@@ -146,7 +146,7 @@ const editSshKeyDashboard = async (req, res) => {
             return res.render("error.ejs", { errorMessage: 'SSH key is too long. Maximum size is 16KB' });
         }
 
-        const sshKey = await ShhKey.findOne({ username, title });
+        const sshKey = await ShhKey.findOne({ username, title: { $eq: title } });
 
         if (!sshKey) {
             return res.render("error.ejs", { errorMessage: 'SSH key not found' });
