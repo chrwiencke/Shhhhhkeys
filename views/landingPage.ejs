@@ -193,12 +193,11 @@ shh -s alice johndoe key1 key2</pre>
                     </a>
                 </div>
                 <p class="mt-8 text-base text-gray-400 md:mt-0 md:order-1">
-                    &copy; <span id="year"></span> Shhhhhkeys. All rights reserved.
+                    &copy; <span id="year">2025</span> Shhhhhkeys. All rights reserved.
                 </p>
             </div>
         </div>
     </footer>
-</body>
-</html>
+    <script>document.getElementById("year").innerHTML = new Date().getFullYear();</script>
+    <%- include('partials/footer'); -%>
 
-<script>document.getElementById("year").innerHTML = new Date().getFullYear();</script>

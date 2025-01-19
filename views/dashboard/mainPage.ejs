@@ -20,7 +20,7 @@
             </div>
 
             <!-- Add Search and Filter Controls -->
-            <div class="mb-6 flex flex-col sm:flex-row gap-4">
+            <div id="sshKeys-search-controls" class="mb-6 flex flex-col sm:flex-row gap-4">
                 <div class="flex-1">
                     <input type="text" 
                            id="sshKeySearch" 
@@ -227,7 +227,7 @@
             </div>
 
             <!-- Add Search and Filter Controls -->
-            <div class="mb-6 flex flex-col sm:flex-row gap-4">
+            <div id="socialKeys-search-controls" class="mb-6 flex flex-col sm:flex-row gap-4">
                 <div class="flex-1">
                     <input type="text" 
                            id="socialKeySearch" 
@@ -386,12 +386,15 @@
     function toggleSection(sectionId) {
         const content = document.getElementById(`${sectionId}-content`);
         const arrow = document.getElementById(`${sectionId}-arrow`);
+        const searchBar = document.querySelector(`#${sectionId}-search-controls`);
         
         if (content.style.display === 'none') {
             content.style.display = 'block';
+            searchBar.style.display = 'flex';
             arrow.style.transform = 'rotate(0deg)';
         } else {
             content.style.display = 'none';
+            searchBar.style.display = 'none';
             arrow.style.transform = 'rotate(-180deg)';
         }
     }
