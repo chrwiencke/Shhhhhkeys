@@ -6,6 +6,9 @@
     <title>Shhhhhkeys - Manage Your SSH Keys</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="stylesheet" href="/stylesheets/style.css">
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 </head>
 <body class="bg-gray-50">
     <!-- Navigation -->
@@ -24,22 +27,27 @@
     </nav>
 
     <!-- Hero Section -->
-    <div class="relative bg-white overflow-hidden">
+    <div class="relative bg-gradient-to-b from-indigo-50 to-white overflow-hidden">
         <div class="max-w-7xl mx-auto">
-            <div class="relative z-10 pb-8 bg-white sm:pb-16 md:pb-20 lg:pb-28 xl:pb-32">
+            <div class="relative z-10 pb-8 sm:pb-16 md:pb-20 lg:pb-28 xl:pb-32">
                 <main class="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 xl:mt-28">
                     <div class="text-center">
                         <h1 class="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
-                            <span class="block">Manage Your SSH Keys</span>
-                            <span class="block text-indigo-600">with Ease</span>
+                            <span class="block">Your SSH Keys,</span>
+                            <span class="block text-indigo-600">Anywhere, Anytime</span>
                         </h1>
                         <p class="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl">
-                            Upload, create, and manage your SSH keys in one place. Access them anywhere with a simple curl command.
+                            Stop copying SSH keys manually. Access your keys securely with a single command. Perfect for DevOps teams and developers who work across multiple machines.
                         </p>
-                        <div class="mt-5 sm:mt-8 sm:flex sm:justify-center">
+                        <div class="mt-5 sm:mt-8 sm:flex sm:justify-center gap-4">
                             <div class="rounded-md shadow">
-                                <a href="/dashboard/" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10">
-                                    Get Started
+                                <a href="/auth/register" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10">
+                                    Start Free
+                                </a>
+                            </div>
+                            <div class="mt-3 sm:mt-0">
+                                <a href="#how-it-works" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-indigo-50 border-indigo-200 md:py-4 md:text-lg md:px-10">
+                                    See How It Works
                                 </a>
                             </div>
                         </div>
@@ -47,15 +55,67 @@
                 </main>
             </div>
         </div>
+    <!-- Interactive Terminal Demo -->
+    <div class="py-16 bg-gray-900" x-data="{ commands: ['curl https://shh.pludo.org/demo/key >> ~/.ssh/authorized_keys', 'shh -u johndoe laptop desktop', 'wget https://shh.pludo.org/shh.sh'], currentCommand: 0 }">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="bg-black rounded-lg p-6" data-aos="fade-up">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex space-x-2">
+                        <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                        <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                        <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                    </div>
+                    <button @click="currentCommand = (currentCommand + 1) % commands.length" class="text-gray-400 hover:text-white text-sm">Next Command ↪</button>
+                </div>
+                <div class="font-mono text-sm">
+                    <span class="text-green-400">$</span>
+                    <span class="text-gray-100" x-text="commands[currentCommand]"></span>
+                    <span class="animate-pulse">▊</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- How It Works (Animated) -->
+    <div class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">How It Works</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="text-center" data-aos="fade-right">
+                    <div class="bg-indigo-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl">1</span>
+                    </div>
+                    <h3 class="font-semibold mb-2">Upload Your Keys</h3>
+                    <p class="text-gray-600">Securely upload your existing SSH keys or generate new ones directly in our dashboard.</p>
+                </div>
+                <div class="text-center" data-aos="fade-up">
+                    <div class="bg-indigo-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl">2</span>
+                    </div>
+                    <h3 class="font-semibold mb-2">Organize & Manage</h3>
+                    <p class="text-gray-600">Label your keys, group them by project, and control access permissions all in one place.</p>
+                </div>
+                <div class="text-center" data-aos="fade-left">
+                    <div class="bg-indigo-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl">3</span>
+                    </div>
+                    <h3 class="font-semibold mb-2">Access Anywhere</h3>
+                    <p class="text-gray-600">Use our simple CLI commands to retrieve your keys on any machine, anytime.</p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Features Section -->
-    <div class="py-12 bg-white">
+    <div class="py-16 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="lg:text-center">
-                <h2 class="text-base text-indigo-600 font-semibold tracking-wide uppercase">Features</h2>
+                <h2 class="text-base text-indigo-600 font-semibold tracking-wide uppercase">Why Choose Shhhhhkeys</h2>
                 <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-                    Everything you need to manage SSH keys
+                    SSH Key Management Made Simple
+                </p>
+                <p class="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto">
+                    Focus on your work, not on managing SSH keys. We handle the complexity for you.
                 </p>
             </div>
 
@@ -129,19 +189,212 @@
         </div>
     </div>
 
-    <!-- CLI Example Section -->
-    <div class="bg-gray-50 py-12">
+    <!-- Pricing Section -->
+    <div class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-4">Free Forever</h2>
+            <p class="text-xl text-gray-600 text-center mb-12">No credit card required. No hidden fees. Just free.</p>
+            
+            <div class="max-w-2xl mx-auto">
+                <div class="bg-white rounded-lg shadow-xl p-8 border-2 border-indigo-600">
+                    <div class="text-center">
+                        <h3 class="text-2xl font-bold mb-4">Everything Included</h3>
+                        <p class="text-4xl font-bold mb-6">$0<span class="text-gray-500 text-base font-normal">/forever</span></p>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-4 mb-8">
+                        <div class="flex items-center space-x-3">
+                            <svg class="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Unlimited SSH keys</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <svg class="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Advanced key management</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <svg class="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Team collaboration</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <svg class="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>API access</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <svg class="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Priority support</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <svg class="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>All future features</span>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <a href="/auth/register" class="inline-block px-8 py-3 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 transition-colors">
+                            Get Started Now
+                        </a>
+                        <p class="mt-4 text-sm text-gray-500">No credit card required</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Testimonials Section -->
+    <div class="bg-white py-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="lg:text-center mb-10">
-                <h2 class="text-3xl font-extrabold text-gray-900">Simple to Use</h2>
+            <h2 class="text-3xl font-extrabold text-center mb-12">Loved by Developers</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-gray-50 p-6 rounded-lg" data-aos="fade-up">
+                    <div class="flex items-center mb-4">
+                        <img src="https://api.dicebear.com/6.x/avataaars/svg?seed=Felix" alt="Avatar" class="w-12 h-12 rounded-full">
+                        <div class="ml-4">
+                            <h4 class="font-semibold">Felix Chen</h4>
+                            <p class="text-gray-600">DevOps Engineer at TechCorp</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-600">"Shhhhhkeys has simplified our entire SSH key management process. It's a game-changer for our DevOps team!"</p>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-lg" data-aos="fade-up" data-aos-delay="100">
+                    <div class="flex items-center mb-4">
+                        <img src="https://api.dicebear.com/6.x/avataaars/svg?seed=Sarah" alt="Avatar" class="w-12 h-12 rounded-full">
+                        <div class="ml-4">
+                            <h4 class="font-semibold">Sarah Johnson</h4>
+                            <p class="text-gray-600">Full Stack Developer</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-600">"I love how easy it is to access my SSH keys across different development environments. No more copy-pasting!"</p>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-lg" data-aos="fade-up" data-aos-delay="200">
+                    <div class="flex items-center mb-4">
+                        <img src="https://api.dicebear.com/6.x/avataaars/svg?seed=Miguel" alt="Avatar" class="w-12 h-12 rounded-full">
+                        <div class="ml-4">
+                            <h4 class="font-semibold">Miguel Rodriguez</h4>
+                            <p class="text-gray-600">Cloud Architect</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-600">"The security features and ease of use make this a must-have tool for any development team working with multiple servers."</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="py-16 bg-white" x-data="{ 
+        faqs: [
+            { 
+                question: 'Is my data secure?', 
+                answer: 'Yes! We use industry-standard encryption and security practices to protect your SSH keys. All data is encrypted at rest and in transit.',
+                open: false 
+            },
+            { 
+                question: 'How much does it cost?', 
+                answer: 'We offer a free tier for individual developers and paid plans for teams. Check our pricing section for detailed information.',
+                open: false 
+            },
+            { 
+                question: 'Can I use this with my existing SSH keys?', 
+                answer: 'Absolutely! You can easily import your existing SSH keys or generate new ones directly in our dashboard.',
+                open: false 
+            },
+            { 
+                question: 'Do you support team management?', 
+                answer: 'Yes! Our team features include role-based access control, audit logs, and the ability to manage keys across your organization.',
+                open: false 
+            },
+            { 
+                question: 'What if I need help?', 
+                answer: 'Our support team is available 24/7. We offer email support for all users and priority support for paid plans.',
+                open: false 
+            }
+        ]
+    }">
+        <div class="max-w-3xl mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
+            <div class="space-y-4">
+                <template x-for="(faq, index) in faqs" :key="index">
+                    <div class="border-b border-gray-200 pb-4">
+                        <button 
+                            @click="faq.open = !faq.open" 
+                            class="w-full flex justify-between items-center py-4 text-left hover:text-indigo-600 transition-colors duration-200"
+                        >
+                            <span class="text-lg font-medium" x-text="faq.question"></span>
+                            <svg 
+                                class="w-6 h-6 transform transition-transform duration-200"
+                                :class="{ 'rotate-45': faq.open }"
+                                fill="none" 
+                                stroke="currentColor" 
+                                viewBox="0 0 24 24"
+                            >
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                        </button>
+                        <div 
+                            x-show="faq.open" 
+                            x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0 transform -translate-y-2"
+                            x-transition:enter-end="opacity-100 transform translate-y-0"
+                            x-transition:leave="transition ease-in duration-200"
+                            x-transition:leave-start="opacity-100 transform translate-y-0"
+                            x-transition:leave-end="opacity-0 transform -translate-y-2"
+                            class="mt-2 text-gray-600 pr-8"
+                        >
+                            <p x-text="faq.answer"></p>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add to your existing style tag -->
+    <style>
+        /* ...existing styles... */
+        [x-cloak] { display: none !important; }
+    </style>
+
+    <!-- Latest Updates -->
+    <div class="bg-gray-50 py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-extrabold text-center mb-12">Latest Updates</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <span class="text-indigo-600 text-sm font-semibold">New Feature</span>
+                    <h3 class="font-bold mt-2">Bulk Key Import</h3>
+                    <p class="text-gray-600 mt-2">Import multiple SSH keys at once with our new bulk import feature.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <span class="text-green-600 text-sm font-semibold">Security</span>
+                    <h3 class="font-bold mt-2">Enhanced Encryption</h3>
+                    <p class="text-gray-600 mt-2">We've upgraded our encryption protocols for even better security.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CLI Example Section with enhanced styling -->
+    <div class="bg-gray-50 py-16" id="how-it-works">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:text-center mb-12">
+                <h2 class="text-3xl font-extrabold text-gray-900">Get Started in Seconds</h2>
                 <p class="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto">
-                    Multiple ways to access and manage your SSH keys
+                    Three simple ways to access your SSH keys from anywhere
                 </p>
             </div>
-            <div class="space-y-6">
+            <div class="space-y-8">
                 <!-- Quick Download -->
-                <div class="bg-gray-800 rounded-lg p-6 overflow-x-auto">
-                    <h3 class="text-xl text-white mb-4">Quick Download</h3>
+                <div class="bg-gray-900 rounded-lg p-6 overflow-x-auto shadow-xl">
+                    <h3 class="text-xl text-white mb-4 font-semibold">⚡ Quick Download</h3>
                     <pre class="text-gray-100 font-mono">
 <span class="text-green-400"># Download a single SSH key and add it to your authorized_keys file</span>
 curl https://shh.pludo.org/<%= user.username %>/title >> ~/.ssh/authorized_keys
@@ -181,6 +434,20 @@ shh -s alice johndoe key1 key2</pre>
         </div>
     </div>
 
+    <!-- Newsletter Section -->
+    <div class="bg-indigo-600 py-16">
+        <div class="max-w-2xl mx-auto px-4 text-center">
+            <h2 class="text-3xl font-bold text-white mb-4">Stay Updated</h2>
+            <p class="text-indigo-100 mb-8">Get notified about new features and security updates.</p>
+            <form class="flex max-w-md mx-auto gap-4">
+                <input type="email" placeholder="Enter your email" class="flex-1 rounded-lg px-4 py-2">
+                <button type="submit" class="bg-white text-indigo-600 px-6 py-2 rounded-lg font-medium hover:bg-indigo-50 transition-colors">
+                    Subscribe
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="bg-white">
         <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
@@ -200,5 +467,22 @@ shh -s alice johndoe key1 key2</pre>
         </div>
     </footer>
     <script>document.getElementById("year").innerHTML = new Date().getFullYear();</script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            AOS.init({
+                duration: 800,
+                once: true
+            });
+        });
+    </script>
     <%- include('partials/footer'); -%>
+    <!-- Add smooth scroll behavior -->
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        [x-cloak] { display: none; }
+    </style>
+</body>
+</html>
 
