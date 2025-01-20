@@ -36,7 +36,7 @@ const postRegister = async (req, res) => {
             });
         }
         
-        if (username === "auth" || username === "dashboard" || username === "about") {
+        if (username === "auth" || username === "dashboard" || username === "about" || username === "email-to-mail-list") {
             return res.render("error.ejs", { errorMessage: 'Cannot be named this' });
         }
 
